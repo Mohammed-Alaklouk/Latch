@@ -41,13 +41,36 @@ public:
 	virtual componentInfo::Type getNodeInfoType() const = 0;
 	virtual void onClick() {}
 
+	// Each functional gate overrides drawBody() with its own silhouette; draw() adds the shared leads and pins.
+	virtual void drawBody(Color borderColor) const;
+	// Where an input lead meets the body at height y (flat left edge by default, concave back for the OR family).
+	virtual float bodyLeftAt(float y) const { return m_rect.x; }
+
+	Color pickBorder(bool selected, bool highlighted) const;
+
+	// Silhouette builders returning a closed outline within m_rect ending at rightX on the output side.
+	std::vector<Vector2> andShape(float rightX) const;
+	std::vector<Vector2> orShape(float rightX) const;
+	std::vector<Vector2> notShape(float rightX) const;
+
+	void fillOutline(const std::vector<Vector2>& pts, Color borderColor) const;
+	void drawBubble(Color borderColor) const;
+	void drawXorBackArc(Color borderColor) const;
+
+	// OR back bulge, keyed to the 4-cell silhouette (not m_rect) so an OR and its NOR twin match.
+	float orBackDepth() const { return 4.0f * CELL_SIZE * 0.32f; }
+	float orBodyLeftAt(float y) const;
+
+	constexpr static float BubbleRadius = 5.0f;
+
+	// Pins sit one cell clear of the body on each side; draw() runs a short lead to each.
 	virtual Vector2 getInputPosition(int input_index) const
 	{
-		return { m_rect.x, m_rect.y + CELL_SIZE + 2 * CELL_SIZE * (input_index) };
+		return { m_rect.x - CELL_SIZE, m_rect.y + CELL_SIZE + 2 * CELL_SIZE * (input_index) };
 	}
 
 	virtual Vector2 getOutputPosition(int output_index = 0) const {
-		return { m_rect.x + m_rect.width, m_rect.y + m_rect.height / 2 };
+		return { m_rect.x + m_rect.width + CELL_SIZE, m_rect.y + m_rect.height / 2 };
 	}
 
 
@@ -60,6 +83,7 @@ public:
 	Color BorderColor{ 80, 85, 95, 255 };
 	Color BorderHighlightColor{ 100, 160, 255, 255 };
 	Color BorderSelectedColor{ 0, 150, 255, 255 };
+	Color LeadColor{ 90, 95, 110, 255 }; // short stubs joining pins to the body
 
 	std::vector<int> m_inputWireIds;
 	std::vector<int> m_outputWireIds;
@@ -86,7 +110,11 @@ public:
 
 		m_outputValues[0] = LookupTable[inputs[0] * 3 + inputs[1]];
 	}
-	
+
+	void drawBody(Color borderColor) const override {
+		fillOutline(andShape(m_rect.x + m_rect.width), borderColor);
+	}
+
 	const char* getLabel() const override { return "AND"; }
 	componentInfo::Type getNodeInfoType() const override { return componentInfo::Type::AND; }
 };
@@ -110,6 +138,10 @@ public:
 		m_outputValues[0] = LookupTable[inputs[0] * 3 + inputs[1]];
 	}
 
+	void drawBody(Color borderColor) const override {
+		fillOutline(orShape(m_rect.x + m_rect.width), borderColor);
+	}
+	float bodyLeftAt(float y) const override { return orBodyLeftAt(y); }
 
 	const char* getLabel() const override { return "OR"; }
 	componentInfo::Type getNodeInfoType() const override { return componentInfo::Type::OR; }
@@ -122,7 +154,7 @@ class NotGate : public Gate {
 		LogicLevel::LOW,  // HIGH
 		LogicLevel::UNDEFINED // UNDEFINED
 	};
-	NotGate(int id, Vector2 position) : Gate(id, position, 1, 1, 4 * CELL_SIZE)	{	}
+	NotGate(int id, Vector2 position) : Gate(id, position, 1, 1, 5 * CELL_SIZE)	{	}
 
 	void evaluate(const std::vector<LogicLevel>& inputs) override{
 		if (inputs.size() < 1) {
@@ -132,6 +164,10 @@ class NotGate : public Gate {
 		m_outputValues[0] = LookupTable[inputs[0]];
 	}
 
+	void drawBody(Color borderColor) const override {
+		fillOutline(notShape(m_rect.x + m_rect.width - CELL_SIZE), borderColor);
+		drawBubble(borderColor);
+	}
 
 	const char* getLabel() const override { return "NOT"; }
 	componentInfo::Type getNodeInfoType() const override { return componentInfo::Type::NOT; }
@@ -154,7 +190,9 @@ public:
 		DrawRectangleRoundedLinesEx(m_rect, 0.1f, 4, 1.5f, borderColor);
 
 		Color fillColor = LogicLevelColors[inputs[0]];
-		DrawCircle(getInputPosition(0).x, getInputPosition(0).y, PinRadius, fillColor);
+		Vector2 pin = getInputPosition(0);
+		DrawLineEx({ m_rect.x, pin.y }, pin, 2.0f, LeadColor);
+		DrawCircle(pin.x, pin.y, PinRadius, fillColor);
 		if (inputs[0] == LogicLevel::UNDEFINED) fillColor = Fade(RED, 0.4f);
 
 		DrawCircle(m_rect.x + m_rect.width / 2, m_rect.y + m_rect.height / 2, 20, fillColor);
@@ -217,7 +255,9 @@ class ToggleGate : public Gate {
 		float ty = m_rect.y + (m_rect.height - 12) * 0.5f;
 		DrawText(label, (int)tx, (int)ty, 12, WHITE);
 
-		DrawCircle(getOutputPosition().x, getOutputPosition().y, PinRadius, LogicLevelColors[m_outputValues[0]]);
+		Vector2 out = getOutputPosition();
+		DrawLineEx({ m_rect.x + m_rect.width, out.y }, out, 2.0f, LeadColor);
+		DrawCircle(out.x, out.y, PinRadius, LogicLevelColors[m_outputValues[0]]);
 	}
 };
 
@@ -229,7 +269,7 @@ public:
 		LogicLevel::HIGH, LogicLevel::LOW,  LogicLevel::UNDEFINED, // HIGH
 		LogicLevel::UNDEFINED, LogicLevel::UNDEFINED, LogicLevel::UNDEFINED // UNDEFINED
 	};
-	NandGate(int id, Vector2 position) : Gate(id, position, 2, 1, 4 * CELL_SIZE) { }
+	NandGate(int id, Vector2 position) : Gate(id, position, 2, 1, 5 * CELL_SIZE) { }
 	void evaluate(const std::vector<LogicLevel>& inputs) override {
 		if (inputs.size() < 2) {
 			m_outputValues[0] = LogicLevel::UNDEFINED;
@@ -237,8 +277,12 @@ public:
 		}
 		m_outputValues[0] = LookupTable[inputs[0] * 3 + inputs[1]];
 	}
+	void drawBody(Color borderColor) const override {
+		fillOutline(andShape(m_rect.x + m_rect.width - CELL_SIZE), borderColor);
+		drawBubble(borderColor);
+	}
 	const char* getLabel() const override { return "NAND"; }
-	componentInfo::Type getNodeInfoType() const override { return componentInfo::Type::NAND; } 
+	componentInfo::Type getNodeInfoType() const override { return componentInfo::Type::NAND; }
 };
 
 class NorGate : public Gate {
@@ -249,7 +293,7 @@ public:
 		LogicLevel::LOW,		LogicLevel::LOW, LogicLevel::LOW, // HIGH
 		LogicLevel::UNDEFINED,	LogicLevel::LOW, LogicLevel::UNDEFINED // UNDEFINED
 	};
-	NorGate(int id, Vector2 position) : Gate(id, position, 2, 1,  4 * CELL_SIZE) { }
+	NorGate(int id, Vector2 position) : Gate(id, position, 2, 1,  5 * CELL_SIZE) { }
 	void evaluate(const std::vector<LogicLevel>& inputs) override {
 		if (inputs.size() < 2) {
 			m_outputValues[0] = LogicLevel::UNDEFINED;
@@ -257,8 +301,13 @@ public:
 		}
 		m_outputValues[0] = LookupTable[inputs[0] * 3 + inputs[1]];
 	}
+	void drawBody(Color borderColor) const override {
+		fillOutline(orShape(m_rect.x + m_rect.width - CELL_SIZE), borderColor);
+		drawBubble(borderColor);
+	}
+	float bodyLeftAt(float y) const override { return orBodyLeftAt(y); }
 	const char* getLabel() const override { return "NOR"; }
-	componentInfo::Type getNodeInfoType() const override { return componentInfo::Type::NOR; } 
+	componentInfo::Type getNodeInfoType() const override { return componentInfo::Type::NOR; }
 };
 
 class XorGate : public Gate {
@@ -277,8 +326,13 @@ class XorGate : public Gate {
 		}
 		m_outputValues[0] = LookupTable[inputs[0] * 3 + inputs[1]];
 	}
+	void drawBody(Color borderColor) const override {
+		fillOutline(orShape(m_rect.x + m_rect.width), borderColor);
+		drawXorBackArc(borderColor);
+	}
+	float bodyLeftAt(float y) const override { return orBodyLeftAt(y); }
 	const char* getLabel() const override { return "XOR"; }
-	componentInfo::Type getNodeInfoType() const override { return componentInfo::Type::XOR; } 
+	componentInfo::Type getNodeInfoType() const override { return componentInfo::Type::XOR; }
 };
 
 class XnorGate : public Gate {
@@ -290,7 +344,7 @@ class XnorGate : public Gate {
 		LogicLevel::LOW,	LogicLevel::HIGH,	LogicLevel::UNDEFINED, // HIGH
 		LogicLevel::UNDEFINED, LogicLevel::UNDEFINED, LogicLevel::UNDEFINED // UNDEFINED
 	};
-	XnorGate(int id, Vector2 position) : Gate(id, position, 2, 1,  4 * CELL_SIZE) { }
+	XnorGate(int id, Vector2 position) : Gate(id, position, 2, 1,  5 * CELL_SIZE) { }
 	void evaluate(const std::vector<LogicLevel>& inputs) override {
 		if (inputs.size() < 2) {
 			m_outputValues[0] = LogicLevel::UNDEFINED;
@@ -298,8 +352,14 @@ class XnorGate : public Gate {
 		}
 		m_outputValues[0] = LookupTable[inputs[0] * 3 + inputs[1]];
 	}
+	void drawBody(Color borderColor) const override {
+		fillOutline(orShape(m_rect.x + m_rect.width - CELL_SIZE), borderColor);
+		drawBubble(borderColor);
+		drawXorBackArc(borderColor);
+	}
+	float bodyLeftAt(float y) const override { return orBodyLeftAt(y); }
 	const char* getLabel() const override { return "XNOR"; }
-	componentInfo::Type getNodeInfoType() const override { return componentInfo::Type::XNOR; } 
+	componentInfo::Type getNodeInfoType() const override { return componentInfo::Type::XNOR; }
 };
 
 

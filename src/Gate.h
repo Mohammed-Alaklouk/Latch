@@ -10,7 +10,8 @@ class Gate {
 public:
 	Gate() = delete;
 	Gate(int id, Vector2 position, int numInputs, int numOutputs, float w)
-		: m_id(id), m_rect({ position.x, position.y, w, (numInputs + 2) * CELL_SIZE })
+		// Even cell-height, min 40px, so the centre lands on the grid.
+		: m_id(id), m_rect({ position.x, position.y, w, (numInputs > 2 ? 2 * numInputs : 4) * CELL_SIZE })
 	{
 		m_inputWireIds.resize(numInputs, -1);
 		m_outputWireIds.resize(numOutputs, -1);
@@ -63,10 +64,12 @@ public:
 
 	constexpr static float BubbleRadius = 5.0f;
 
-	// Pins sit one cell clear of the body on each side; draw() runs a short lead to each.
+	// Inputs one cell clear of the body, spread symmetrically about its centre.
 	virtual Vector2 getInputPosition(int input_index) const
 	{
-		return { m_rect.x - CELL_SIZE, m_rect.y + CELL_SIZE + 2 * CELL_SIZE * (input_index) };
+		int n = (int)m_inputWireIds.size();
+		float cy = m_rect.y + m_rect.height / 2;
+		return { m_rect.x - CELL_SIZE, cy + (input_index - (n - 1) / 2.0f) * 2 * CELL_SIZE };
 	}
 
 	virtual Vector2 getOutputPosition(int output_index = 0) const {

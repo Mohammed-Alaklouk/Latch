@@ -6,6 +6,11 @@ routing, drive them with toggle switches, and watch signals propagate in real
 time. Built in C++20 with [raylib](https://www.raylib.com/) for rendering and
 [Dear ImGui](https://github.com/ocornut/imgui) for the UI panels.
 
+<p align="center">
+  <img src="docs/screenshots/hero.png" width="800"
+       alt="Latch running a full adder, with the component palette, sheet tabs, simulation controls and snapshot history around the canvas">
+</p>
+
 ## Features
 
 - **Nine components** — `AND`, `NAND`, `OR`, `NOR`, `XOR`, `XNOR`, `NOT`, `LED`
@@ -28,6 +33,39 @@ time. Built in C++20 with [raylib](https://www.raylib.com/) for rendering and
 - **Multiple sheets** — keep several independent circuits open as named tabs;
   add, delete, rename, and switch between them. The component palette and the
   clipboard are shared, so you can copy from one sheet and paste into another.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/half-adder.png"
+           alt="A half adder built from an XOR and an AND gate, driven by two toggles into two LEDs"><br>
+      <b>Half adder</b>: <code>XOR</code> gives the sum, <code>AND</code> the carry, with one
+      output branched into both gates. <code>1 + 0 = 01</code>.
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/sr-latch.png"
+           alt="An SR latch built from two cross-coupled NOR gates, holding Q high while both inputs are low"><br>
+      <b>SR latch</b>: cross-coupled <code>NOR</code> gates hold <code>Q</code> high after the
+      set pulse is released, so the circuit remembers with both inputs low.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/ripple-carry-adder.png"
+           alt="A 3-bit ripple-carry adder laid out as a staircase of three full-adder cells"><br>
+      <b>3-bit ripple-carry adder</b>: three full adders chained carry-to-carry.
+      <code>011 + 011 = 110</code>.
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/three-valued-logic.png"
+           alt="Three AND gates showing HIGH in green, LOW in grey and an UNDEFINED output in orange"><br>
+      <b>Three-valued logic</b>: <code>HIGH</code> and <code>LOW</code> propagate as usual; the
+      bottom gate has a floating input, so its output is <code>UNDEFINED</code> rather than guessed.
+    </td>
+  </tr>
+</table>
 
 ## Controls
 

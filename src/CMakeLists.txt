@@ -3,6 +3,7 @@ add_library(latch_core STATIC
     Circuit.cpp Circuit.h
     Gate.cpp Gate.h
     Wire.cpp Wire.h
+    Serializer.cpp Serializer.h
     ComponentInfo.h IdManager.h Action.h Pin.h
 )
 
@@ -10,8 +11,8 @@ add_library(latch_core STATIC
 target_include_directories(latch_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # raylib is a dependency of the latch_core library as Circuit, Gate, and Wire classes render themselves for now. 
-target_link_libraries(latch_core PUBLIC raylib)
+target_link_libraries(latch_core PUBLIC raylib PUBLIC nlohmann_json::nlohmann_json)
 
 
-add_executable(Latch main.cpp App.cpp App.h sheet.cpp sheet.h)
+add_executable(Latch main.cpp App.cpp App.h Sheet.cpp Sheet.h)
 target_link_libraries(Latch PRIVATE latch_core imgui rlImGui)

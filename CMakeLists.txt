@@ -26,9 +26,15 @@ FetchContent_Declare(rlimgui
     GIT_SHALLOW    TRUE
 )
 
+FetchContent_Declare(json
+    URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+
 FetchContent_MakeAvailable(raylib)
 FetchContent_MakeAvailable(imgui)
 FetchContent_MakeAvailable(rlimgui)
+FetchContent_MakeAvailable(json)
 
 # --- ImGui core library ---
 add_library(imgui STATIC

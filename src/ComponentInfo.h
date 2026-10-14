@@ -22,7 +22,7 @@ struct componentInfo {
 	Type type;
 	int id;
 	Vector2 position;
-	std::vector<int> input_components;
-	std::vector<int> output_components;
+	std::vector<int> input_wireIDs;
+	std::vector<int> output_wireIDs;
 	std::vector<LogicLevel> output_value;
 };

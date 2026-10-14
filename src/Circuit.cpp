@@ -243,8 +243,8 @@ void Circuit::restoreComponent(componentInfo nodeInfo)
 {
 	if (nodeInfo.type < 0 || nodeInfo.type >= componentInfo::COMPONENT_COUNT) return;
 	std::unique_ptr<Gate> new_component = std::move(GateFactories[nodeInfo.type](nodeInfo.id, nodeInfo.position));
-	new_component->m_inputWireIds = nodeInfo.input_components;
-	new_component->m_outputWireIds = nodeInfo.output_components;
+	new_component->m_inputWireIds = nodeInfo.input_wireIDs;
+	new_component->m_outputWireIds = nodeInfo.output_wireIDs;
 	new_component->m_outputValues = nodeInfo.output_value;
 	m_components.push_back(std::move(new_component));
 }
@@ -293,8 +293,8 @@ void Circuit::paste(const std::vector<Wire>& wires, const std::vector<componentI
 		int newComponentID = oldToNewComponentIDMap[componentInfo.id];
 		auto& component = getComponent(newComponentID);
 		
-		for (int j = 0; j < componentInfo.input_components.size(); ++j) {
-			int oldWireID = componentInfo.input_components[j];
+		for (int j = 0; j < componentInfo.input_wireIDs.size(); ++j) {
+			int oldWireID = componentInfo.input_wireIDs[j];
 			if (oldToNewWireIDMap.find(oldWireID) == oldToNewWireIDMap.end()) {
 				component->m_inputWireIds[j] = -1; 
 				continue;
@@ -303,8 +303,8 @@ void Circuit::paste(const std::vector<Wire>& wires, const std::vector<componentI
 			component->m_inputWireIds[j] = oldToNewWireIDMap[oldWireID];
 		}
 
-		for (int j = 0; j < componentInfo.output_components.size(); ++j) {
-			int oldWireID = componentInfo.output_components[j];
+		for (int j = 0; j < componentInfo.output_wireIDs.size(); ++j) {
+			int oldWireID = componentInfo.output_wireIDs[j];
 			if (oldToNewWireIDMap.find(oldWireID) == oldToNewWireIDMap.end()) {
 				component->m_outputWireIds[j] = -1; 
 				continue;

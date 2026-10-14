@@ -20,6 +20,14 @@ public:
 		return indices.size() - 1;
 	}
 
+	const std::vector<int>& getIndices() const {
+		return indices;
+	}
+
+	const std::vector<int>& getFreeIds() const {
+		return free_ids;
+	}
+
 	void setIndex(int id, int index) {
 		if (id >= (int)indices.size()) {
 			return;

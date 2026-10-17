@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <stack>
 #include <algorithm>
+#include <nlohmann/json.hpp>
 
 typedef std::pair<int, int> WireSegment; // pair of node IDs
 
@@ -27,6 +28,8 @@ public:
 
 	Wire(int id, PinRef source, Vector2 sourcePos, PinRef destination, Vector2 destPos, Elbow first = Elbow::HorizontalFirst);
 	Wire(const int id, const Wire& other, const std::unordered_map<int, int>& oldToNewComponentIDMap, const Vector2 displacement);
+	explicit Wire(const nlohmann::json& wireJson);
+
 
 	int findNodeAt(Vector2 pos) const;
 	WireSegment findSegmentAt(Vector2 pos) const;

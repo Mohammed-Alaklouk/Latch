@@ -32,6 +32,34 @@ Wire::Wire(const int id, const Wire& other, const std::unordered_map<int, int>& 
 	normalize();
 }
 
+// Currently the wire trusts the input to be correct
+// The serializer stores it the same way its stored in momery but without the adjacency list
+// When loading the wire, the adjacency list is rebuilt from the segments
+Wire::Wire(const nlohmann::json& wireJson)
+{
+	ID = wireJson.at("id").get<int>();
+	Value = static_cast<LogicLevel>(wireJson.at("value").get<int>());
+	SourceNodeID = wireJson.at("sourceNodeID").get<int>();
+	DestinationNodeIDs = wireJson.at("destinationNodeIDs").get<std::vector<int>>();
+	const auto& nodeIDManagerJson = wireJson.at("nodeIDManager");
+	node_id_manager.setIndices(nodeIDManagerJson.at("indices").get<std::vector<int>>());
+	node_id_manager.setFreeIds(nodeIDManagerJson.at("free_ids").get<std::vector<int>>());
+	for (const auto& nodeJson : wireJson.at("nodes")) {
+		PinRef pin{ nodeJson.at("pin").at(0).get<int>(), nodeJson.at("pin").at(1).get<int>() };
+		Vector2 pos{ nodeJson.at("position").at(0).get<float>(), nodeJson.at("position").at(1).get<float>() };
+		WireNode::NodeType type = static_cast<WireNode::NodeType>(nodeJson.at("type").get<int>());
+		int id = nodeJson.at("id").get<int>();
+		Nodes.push_back({ pin, pos, type, id });
+		node_id_manager.setIndex(id, (int)Nodes.size() - 1);
+	}
+
+	for (const auto& segmentJson : wireJson.at("segments")) {
+		int a = segmentJson.at(0).get<int>();
+		int b = segmentJson.at(1).get<int>();
+		addSegment(a, b);
+	}
+}
+
 // ===========================================================================
 //  Read-only accessors
 // ===========================================================================

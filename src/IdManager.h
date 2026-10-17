@@ -24,8 +24,16 @@ public:
 		return indices;
 	}
 
+	void setIndices(const std::vector<int>& new_indices) {
+		indices = new_indices;
+	}
+
 	const std::vector<int>& getFreeIds() const {
 		return free_ids;
+	}
+
+	void setFreeIds(const std::vector<int>& new_free_ids) {
+		free_ids = new_free_ids;
 	}
 
 	void setIndex(int id, int index) {

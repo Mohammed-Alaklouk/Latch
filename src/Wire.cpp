@@ -416,7 +416,7 @@ std::vector<WireNode> Wire::clearAll()
 // ===========================================================================
 
 void Wire::draw(const std::vector<int>& selectedNodeIDs, const std::vector<WireSegment>& selectedSegments, const std::vector<int>& hiddenNodeIDs) const {
-	Color wire_color = Settings::CurrentTheme().LogicLevelColors[Value];
+	Color wire_color = Settings::CurrentTheme().logicLevelColors[Value];
 
 	auto hidden = [&](int nodeID) {
 		return std::find(hiddenNodeIDs.begin(), hiddenNodeIDs.end(), nodeID) != hiddenNodeIDs.end();
@@ -426,9 +426,9 @@ void Wire::draw(const std::vector<int>& selectedNodeIDs, const std::vector<WireS
 	{
 		if (hidden(segment.first) || hidden(segment.second)) continue; // a moved node's leg; the preview draws it instead
 
-		wire_color = Settings::CurrentTheme().LogicLevelColors[Value];
+		wire_color = Settings::CurrentTheme().logicLevelColors[Value];
 		if (std::find(selectedSegments.begin(), selectedSegments.end(), segment) != selectedSegments.end())
-			wire_color = SelectedColor;
+			wire_color = Settings::CurrentTheme().selectionColor;
 
 		Vector2 start_pos = positionOf(segment.first);
 		Vector2 end_pos = positionOf(segment.second);
@@ -439,8 +439,8 @@ void Wire::draw(const std::vector<int>& selectedNodeIDs, const std::vector<WireS
 		if (hidden(node.ID)) continue; // drawn at its new spot by the preview
 
 		bool selected = std::find(selectedNodeIDs.begin(), selectedNodeIDs.end(), node.ID) != selectedNodeIDs.end();
-		wire_color = Settings::CurrentTheme().LogicLevelColors[Value];
-		if (selected) wire_color = SelectedColor;
+		wire_color = Settings::CurrentTheme().logicLevelColors[Value];
+		if (selected) wire_color = Settings::CurrentTheme().selectionColor;
 
 		if (node.Type == WireNode::JUNCTION) {
 			DrawCircleV(node.Position, NodeRadius, wire_color);
@@ -451,7 +451,6 @@ void Wire::draw(const std::vector<int>& selectedNodeIDs, const std::vector<WireS
 	}
 }
 
-Color Wire::SelectedColor = { 0, 150, 255, 255 };
 float Wire::NodeRadius = 5.0f;
 float Wire::SegmentThickness = 3.0f;
 

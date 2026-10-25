@@ -210,7 +210,6 @@ public:
 		return CheckCollisionPointRec(point, rect);
 	}
 
-	static Color SelectedColor;
 	static float NodeRadius;
 	static float SegmentThickness;
 

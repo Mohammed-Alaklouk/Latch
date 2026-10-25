@@ -1,4 +1,5 @@
 ﻿#include "Circuit.h"
+#include <nlohmann/json.hpp>
 
 void Circuit::evaluate()
 {
@@ -313,4 +314,36 @@ void Circuit::paste(const std::vector<Wire>& wires, const std::vector<componentI
 			component->m_outputWireIds[j] = oldToNewWireIDMap[oldWireID];
 		}
 	}
+}
+
+void to_json(nlohmann::json& j, const Circuit::CircuitSnapshot& snapshot)
+{
+	j = {
+		{"components", snapshot.components},
+		{"wires", snapshot.wires},
+		{
+			"component-ids", {
+				{"indices", snapshot.component_ids.getIndices()},
+				{"free-ids", snapshot.component_ids.getFreeIds()}
+			}
+		},
+		{
+			"wire-ids", {
+				{"indices", snapshot.wire_ids.getIndices()},
+				{"free-ids", snapshot.wire_ids.getFreeIds()}
+			}
+		},
+		{"note", snapshot.note}
+	};
+}
+
+void from_json(const nlohmann::json& j, Circuit::CircuitSnapshot& snapshot)
+{
+	snapshot.component_ids.setIndices(j.at("component-ids").at("indices").get<std::vector<int>>());
+	snapshot.component_ids.setFreeIds(j.at("component-ids").at("free-ids").get<std::vector<int>>());
+	snapshot.wire_ids.setIndices(j.at("wire-ids").at("indices").get<std::vector<int>>());
+	snapshot.wire_ids.setFreeIds(j.at("wire-ids").at("free-ids").get<std::vector<int>>());
+	snapshot.note = j.at("note").get<std::string>();
+	snapshot.components = j.at("components").get<std::vector<componentInfo>>();
+	snapshot.wires = j.at("wires").get<std::vector<Wire>>();
 }

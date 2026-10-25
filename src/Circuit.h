@@ -8,6 +8,8 @@
 #include "Wire.h"
 #include "IdManager.h"
 
+#include <nlohmann/json_fwd.hpp>
+
 
 
 
@@ -21,6 +23,9 @@ public:
 		IdManager component_ids;
 		IdManager wire_ids;
 		std::string note;
+
+		friend void to_json(nlohmann::json& j, const CircuitSnapshot& snapshot);
+		friend void from_json(const nlohmann::json& j, CircuitSnapshot& snapshot);
 	};
 
 	void evaluate();

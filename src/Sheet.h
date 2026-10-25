@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include "raylib.h"
 #include "imgui.h"
 
@@ -79,6 +80,8 @@ public:
 
 	void SetViewport(Rectangle viewport);
 	void SetTitle(const std::string& title) { this->title = title; }
+	void SetFilePath(const std::filesystem::path& path) { this->file_path = path; }
+	const std::filesystem::path GetFilePath() const { return file_path; }
 	std::string GetTitle() const { return title; }
 	Rectangle GetViewport() const { return viewport; }
 	const Camera2D& GetCamera() const { return camera; }
@@ -145,4 +148,5 @@ private:
 	componentInfo::Type selected_gate_type = componentInfo::Type::AND;
 
 	std::string title;
+	std::filesystem::path file_path = {};
 };

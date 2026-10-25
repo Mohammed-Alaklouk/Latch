@@ -14,11 +14,6 @@ App::App()
     
     SetTargetFPS(60);
     rlImGuiSetup(true);
-
-	auto saveFolder = std::filesystem::current_path() / "saves";
-    if (!std::filesystem::exists(saveFolder)) {
-        std::filesystem::create_directory(saveFolder);
-	}
 }
 
 App::~App()
@@ -79,6 +74,8 @@ void App::UI()
     rlImGuiBegin();
 
     ImGui::Begin("file");
+    if (ImGui::Button("Save"))
+        SaveCurrentSheet();
     if (ImGui::Button("Save as"))
         SaveCurrentSheet();
 
@@ -178,6 +175,15 @@ void App::Draw()
 void App::SaveCurrentSheet()
 {
 	auto saveFolder = std::filesystem::current_path() / "saves";
+    if (!std::filesystem::exists(saveFolder)) {
+        std::filesystem::create_directory(saveFolder);
+    }
+
+    if (!(GetCurrentSheet().GetFilePath().empty())) {
+        Serializer::saveSheet(GetCurrentSheet().GetFilePath(), GetCurrentSheet().GetCircuit(), GetCurrentSheet().GetSimulationSettings());
+		return;
+    }
+
     nfdu8filteritem_t filters[] = { { "Latch circuit", "json" } };
     std::u8string defaultPath = saveFolder.u8string();
 
@@ -219,6 +225,7 @@ void App::LoadSheetFromFile()
     Serializer::loadSheet(path, newSheet->GetCircuit(), newSheet->GetSimulationSettings());
 	newSheet->SetViewport({ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() });
     newSheet->SetTitle(name);
+	newSheet->SetFilePath(path);
     sheets.push_back(std::move(newSheet));
     current_sheet_index = sheets.size() - 1;
 }

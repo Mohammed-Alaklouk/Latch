@@ -114,7 +114,11 @@ void App::UI()
 
         ImGui::SameLine();
 
-        if (ImGui::Button(((*sheet)->GetTitle() + "##" + std::to_string(index)).c_str()))
+		auto title = (*sheet)->GetTitle();
+        if (!(*sheet)->IsSaved() || (*sheet)->GetFilePath().empty())
+			title += "*";
+
+        if (ImGui::Button((title + "##" + std::to_string(index)).c_str()))
             current_sheet_index = index;
 
         if (current_sheet_index == index)
@@ -200,6 +204,8 @@ void App::SaveCurrentSheet()
 
     std::filesystem::path path(reinterpret_cast<const char8_t*>(outPath.get()));
     Serializer::saveSheet(path, GetCurrentSheet().GetCircuit(), GetCurrentSheet().GetSimulationSettings());
+	GetCurrentSheet().SetFilePath(path);
+    GetCurrentSheet().SetSaved();
 }
 
 void App::LoadSheetFromFile()
@@ -226,6 +232,7 @@ void App::LoadSheetFromFile()
 	newSheet->SetViewport({ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() });
     newSheet->SetTitle(name);
 	newSheet->SetFilePath(path);
+	newSheet->ResetHistory();
     sheets.push_back(std::move(newSheet));
     current_sheet_index = sheets.size() - 1;
 }

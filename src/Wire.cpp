@@ -1,4 +1,5 @@
 #include "Wire.h"
+#include "Settings.h"
 #include <nlohmann/json.hpp>
 
 Wire::Wire(int id, PinRef source, Vector2 sourcePos, PinRef destination, Vector2 destPos, Elbow first)
@@ -415,7 +416,7 @@ std::vector<WireNode> Wire::clearAll()
 // ===========================================================================
 
 void Wire::draw(const std::vector<int>& selectedNodeIDs, const std::vector<WireSegment>& selectedSegments, const std::vector<int>& hiddenNodeIDs) const {
-	Color wire_color = LogicLevelColors[Value];
+	Color wire_color = Settings::CurrentTheme().LogicLevelColors[Value];
 
 	auto hidden = [&](int nodeID) {
 		return std::find(hiddenNodeIDs.begin(), hiddenNodeIDs.end(), nodeID) != hiddenNodeIDs.end();
@@ -425,7 +426,7 @@ void Wire::draw(const std::vector<int>& selectedNodeIDs, const std::vector<WireS
 	{
 		if (hidden(segment.first) || hidden(segment.second)) continue; // a moved node's leg; the preview draws it instead
 
-		wire_color = LogicLevelColors[Value];
+		wire_color = Settings::CurrentTheme().LogicLevelColors[Value];
 		if (std::find(selectedSegments.begin(), selectedSegments.end(), segment) != selectedSegments.end())
 			wire_color = SelectedColor;
 
@@ -438,7 +439,7 @@ void Wire::draw(const std::vector<int>& selectedNodeIDs, const std::vector<WireS
 		if (hidden(node.ID)) continue; // drawn at its new spot by the preview
 
 		bool selected = std::find(selectedNodeIDs.begin(), selectedNodeIDs.end(), node.ID) != selectedNodeIDs.end();
-		wire_color = LogicLevelColors[Value];
+		wire_color = Settings::CurrentTheme().LogicLevelColors[Value];
 		if (selected) wire_color = SelectedColor;
 
 		if (node.Type == WireNode::JUNCTION) {

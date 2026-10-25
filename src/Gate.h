@@ -191,7 +191,7 @@ public:
 		DrawRectangle(m_rect.x, m_rect.y, 3.0f, m_rect.height, AccentColor);
 		DrawRectangleRoundedLinesEx(m_rect, 0.1f, 4, 1.5f, borderColor);
 
-		Color fillColor = LogicLevelColors[inputs[0]];
+		Color fillColor = Settings::CurrentTheme().LogicLevelColors[inputs[0]];
 		Vector2 pin = getInputPosition(0);
 		DrawLineEx({ m_rect.x, pin.y }, pin, 2.0f, LeadColor);
 		DrawCircle(pin.x, pin.y, PinRadius, fillColor);
@@ -247,7 +247,7 @@ class ToggleGate : public Gate {
 		DrawRectangle(m_rect.x, m_rect.y, 3.0f, m_rect.height, AccentColor);
 		DrawRectangleRoundedLinesEx(m_rect, 0.1f, 4, 1.5f, borderColor);
 		
-		Color fillColor = LogicLevelColors[m_outputValues[0]];
+		Color fillColor = Settings::CurrentTheme().LogicLevelColors[m_outputValues[0]];
 		DrawCircle(m_rect.x + m_rect.width / 2, m_rect.y + m_rect.height / 2, 20, fillColor);
 		DrawCircleLines(m_rect.x + m_rect.width / 2, m_rect.y + m_rect.height / 2, 20, borderColor);
 		
@@ -259,7 +259,7 @@ class ToggleGate : public Gate {
 
 		Vector2 out = getOutputPosition();
 		DrawLineEx({ m_rect.x + m_rect.width, out.y }, out, 2.0f, LeadColor);
-		DrawCircle(out.x, out.y, PinRadius, LogicLevelColors[m_outputValues[0]]);
+		DrawCircle(out.x, out.y, PinRadius, Settings::CurrentTheme().LogicLevelColors[m_outputValues[0]]);
 	}
 };
 

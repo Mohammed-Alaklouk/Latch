@@ -173,23 +173,23 @@ void Sheet::Draw()
         {
             auto& sourceComponent = circuit.getComponent(connecting_context.sourceComponentID);
             start = sourceComponent->getOutputPosition();
-            line_color = LogicLevelColors[sourceComponent->m_outputValues[0]];
+            line_color = Settings::CurrentTheme().LogicLevelColors[sourceComponent->m_outputValues[0]];
         }
         else if (connecting_context.type == ConnectingContext::ConnectionType::INPUT)
         {
             auto& sourceComponent = circuit.getComponent(connecting_context.sourceComponentID);
             start = sourceComponent->getInputPosition(connecting_context.sourceInputIndex);
-            line_color = LogicLevelColors[LogicLevel::UNDEFINED]; // nothing drives it until it lands on an output
+            line_color = Settings::CurrentTheme().LogicLevelColors[LogicLevel::UNDEFINED]; // nothing drives it until it lands on an output
         }
         else if (connecting_context.sourceNodeID != -1) {
             auto& sourceWire = circuit.getWire(connecting_context.wireID);
             start = sourceWire.getNodePosition(connecting_context.sourceNodeID);
-            line_color = LogicLevelColors[sourceWire.Value];
+            line_color = Settings::CurrentTheme().LogicLevelColors[sourceWire.Value];
         }
         else {
             auto& sourceWire = circuit.getWire(connecting_context.wireID);
             start = connecting_context.sourcePos;
-            line_color = LogicLevelColors[sourceWire.Value];
+            line_color = Settings::CurrentTheme().LogicLevelColors[sourceWire.Value];
         }
 
         auto route = Wire::routePoints(start, destination_pos, connecting_context.elbow);
@@ -231,7 +231,7 @@ void Sheet::Draw()
                 const auto& moving = selectedNodesOf(wireID);
                 if (contains(moving, nodeID)) continue; // group preview covers it
                 for (auto& leg : wire.previewMoveLegs(nodeID, component->getOutputPosition(j), dragging_context.elbow, moving, dragging_context.snapped_delta))
-                    drawLeg(leg, LogicLevelColors[wire.Value]);
+                    drawLeg(leg, Settings::CurrentTheme().LogicLevelColors[wire.Value]);
             }
 
             for (int i = 0; i < component->m_inputWireIds.size(); ++i) {
@@ -244,7 +244,7 @@ void Sheet::Draw()
                 if (contains(moving, nodeID)) continue; // group preview covers it
                 // input pin node moves to the new pin position (mirrors moveNodeWithElbow)
                 for (auto& leg : wire.previewMoveLegs(nodeID, component->getInputPosition(i), dragging_context.elbow, moving, dragging_context.snapped_delta))
-                    drawLeg(leg, LogicLevelColors[wire.Value]);
+                    drawLeg(leg, Settings::CurrentTheme().LogicLevelColors[wire.Value]);
             }
         }
 
@@ -253,7 +253,7 @@ void Sheet::Draw()
             if (!circuit.wireExists(t.first)) continue;
             auto& wire = circuit.getWire(t.first);
             for (auto& leg : wire.previewMoveGroupLegs(t.second, dragging_context.snapped_delta, dragging_context.elbow))
-                drawLeg(leg, LogicLevelColors[wire.Value]);
+                drawLeg(leg, Settings::CurrentTheme().LogicLevelColors[wire.Value]);
         }
     }
     else if (current_mouse_state == MouseState::Selecting)

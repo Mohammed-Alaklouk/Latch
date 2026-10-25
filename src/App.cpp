@@ -61,6 +61,8 @@ void App::HandleInput()
 
         if (IsKeyPressed(KEY_Z))        sheet.Undo();
         else if (IsKeyPressed(KEY_Y))   sheet.Redo();
+
+		if (IsKeyPressed(KEY_S))        SaveCurrentSheet();
     }
 }
 

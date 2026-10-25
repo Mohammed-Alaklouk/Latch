@@ -33,6 +33,10 @@ namespace Settings {
 		Color GridMinor;
 		Color GridMajor;
 		Color SelectionColor;
+		Color LabelColor;
+		Color SelectionRectangleFill;
+		Color SelectionRectangleOutline;
+		Color UndefinedHaloColor;
 		Color LogicLevelColors[3];
 		GateColors Gates;
 	};
@@ -42,6 +46,10 @@ namespace Settings {
 		.GridMinor					= {30,30,30,255},			
 		.GridMajor					= {50,50,50,255},			
 		.SelectionColor				= {0, 150, 255, 255},		
+		.LabelColor					= WHITE,
+		.SelectionRectangleFill		= {255,0,0,50},
+		.SelectionRectangleOutline	= RED,
+		.UndefinedHaloColor			= {230, 40, 55, 100 },
 		.LogicLevelColors = {
 			{60, 60, 60, 255},		// LOW
 			{0, 220, 80, 255},		// HIGH

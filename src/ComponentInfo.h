@@ -2,6 +2,7 @@
 #include <vector>
 #include "raylib.h"
 #include "Pin.h"
+#include <nlohmann/json_fwd.hpp>
 
 struct componentInfo {
 	enum Type
@@ -18,6 +19,10 @@ struct componentInfo {
 
 		COMPONENT_COUNT
 	};
+
+	// Helper functions to convert between componentInfo and JSON using nlohmann::json
+	friend void to_json(nlohmann::json& j, const componentInfo& c);
+	friend void from_json(const nlohmann::json& j, componentInfo& c);
 
 	Type type;
 	int id;

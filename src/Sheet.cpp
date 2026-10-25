@@ -258,8 +258,8 @@ void Sheet::Draw()
     }
     else if (current_mouse_state == MouseState::Selecting)
     {
-        DrawRectangleRec(selecting_context.selectionRect, { 255, 0, 0, 50 });
-        DrawRectangleLinesEx(selecting_context.selectionRect, 2, RED);
+        DrawRectangleRec(selecting_context.selectionRect, Settings::CurrentTheme().SelectionRectangleFill);
+        DrawRectangleLinesEx(selecting_context.selectionRect, 2, Settings::CurrentTheme().SelectionRectangleOutline);
     }
 
     auto top_left = GetScreenToWorld2D({ 0, 0 }, camera);

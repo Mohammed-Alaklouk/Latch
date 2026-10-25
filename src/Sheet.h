@@ -61,6 +61,13 @@ struct SelectionContext {
 	Rectangle selectionRect;
 };
 
+struct SimulationSettings {
+	bool is_running = false;
+	float ticks_per_second = 0.5f;
+	float time_since_last_tick = 0.0f;
+	int number_of_ticks = 0;
+};
+
 
 class Sheet
 
@@ -149,10 +156,7 @@ private:
 	std::unordered_map<int, std::vector<int>> selected_wire_nodes;
 	std::unordered_map<int, std::vector<WireSegment>> selected_wire_segments;
 
-	bool is_simulation_running = false;
-	float ticks_per_second = 0.5f;
-	float time_since_last_tick = 0.0f;
-	int number_of_ticks = 0;
+	SimulationSettings simulation_settings;
 
 	ActionManager action_manager;
 

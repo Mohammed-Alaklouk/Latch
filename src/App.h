@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <nfd.hpp>
 
 #include "raylib.h"
 #include "rlImGui.h"
@@ -22,6 +23,8 @@ private:
 	void Update(float deltaTime);
 	void UI();
 	void Draw();
+	void SaveCurrentSheet();
+	void LoadSheetFromFile();
 
 	void GetMouseInputs(MouseInputs& mouse_inputs);
 	Sheet& GetCurrentSheet() { return *sheets[current_sheet_index]; }
@@ -36,4 +39,5 @@ private:
 	char new_sheet_title[64] = ""; 
 
 	componentInfo::Type selected_gate_type = componentInfo::Type::AND;
+	NFD::Guard nfd_guard;
 };

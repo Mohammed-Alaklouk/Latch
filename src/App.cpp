@@ -14,6 +14,11 @@ App::App()
     
     SetTargetFPS(60);
     rlImGuiSetup(true);
+
+	auto saveFolder = std::filesystem::current_path() / "saves";
+    if (!std::filesystem::exists(saveFolder)) {
+        std::filesystem::create_directory(saveFolder);
+	}
 }
 
 App::~App()
@@ -39,7 +44,6 @@ void App::HandleInput()
         }
     }
 
-    
 	Sheet& sheet = GetCurrentSheet();
 	MouseInputs mouse_inputs;
 	GetMouseInputs(mouse_inputs);
@@ -70,9 +74,18 @@ void App::Update(float deltaTime)
 	GetCurrentSheet().Update(deltaTime);
 }
 
-void App::UI() 
+void App::UI()
 {
     rlImGuiBegin();
+
+    ImGui::Begin("file");
+    if (ImGui::Button("Save as"))
+        SaveCurrentSheet();
+
+    if (ImGui::Button("Load file"))
+        LoadSheetFromFile();
+
+    ImGui::End();
 
     ImGui::Begin("Components");
 
@@ -97,53 +110,53 @@ void App::UI()
     ImGui::End();
 
     ImGui::Begin("Sheets");
-	int index = 0;
+    int index = 0;
     for (auto sheet = sheets.begin(); sheet != sheets.end();)
     {
-		bool should_delete = ImGui::Button(("Delete##" + std::to_string(index)).c_str());
-        
-		ImGui::SameLine();
+        bool should_delete = ImGui::Button(("Delete##" + std::to_string(index)).c_str());
+
+        ImGui::SameLine();
 
         if (ImGui::Button(((*sheet)->GetTitle() + "##" + std::to_string(index)).c_str()))
             current_sheet_index = index;
 
         if (current_sheet_index == index)
         {
-			ImGui::SameLine();
-			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Current");
-		}
-        
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Current");
+        }
+
         if (should_delete && sheets.size() > 1)
         {
-            sheet = sheets.erase(sheet);   
+            sheet = sheets.erase(sheet);
             if (current_sheet_index > index)          // strictly greater: only shift when above
                 current_sheet_index--;
             else if (current_sheet_index == index)    // deleted the active sheet
                 current_sheet_index = (index > 0) ? index - 1 : 0;
 
 
-            continue;                      
+            continue;
         }
         index++;
-		sheet++;
+        sheet++;
     }
 
-	ImGui::InputText("Sheet Title", new_sheet_title, sizeof(new_sheet_title));
-	ImGui::SameLine();
+    ImGui::InputText("Sheet Title", new_sheet_title, sizeof(new_sheet_title));
+    ImGui::SameLine();
     if (ImGui::Button("Add Sheet"))
     {
         sheets.push_back(std::make_unique<Sheet>());
-		sheets.back()->SetViewport({ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() });
+        sheets.back()->SetViewport({ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() });
         sheets.back()->SetTitle(new_sheet_title);
-		if (new_sheet_title[0] == '\0')
+        if (new_sheet_title[0] == '\0')
             sheets.back()->SetTitle("Untitled Sheet" + std::to_string(sheets.size()));
-        
-		current_sheet_index = sheets.size() - 1;
-		new_sheet_title[0] = '\0';   // clear the input for the next sheet
-	}
-	ImGui::End();
 
-	GetCurrentSheet().UI();
+        current_sheet_index = sheets.size() - 1;
+        new_sheet_title[0] = '\0';   // clear the input for the next sheet
+    }
+    ImGui::End();
+
+    GetCurrentSheet().UI();
     rlImGuiEnd();
 }
 
@@ -160,6 +173,54 @@ void App::Draw()
 
     UI();
     EndDrawing();
+}
+
+void App::SaveCurrentSheet()
+{
+	auto saveFolder = std::filesystem::current_path() / "saves";
+    nfdu8filteritem_t filters[] = { { "Latch circuit", "json" } };
+    std::u8string defaultPath = saveFolder.u8string();
+
+    NFD::UniquePathU8 outPath;
+    nfdresult_t result = NFD::SaveDialog(outPath, filters, 1,
+        reinterpret_cast<const char*>(defaultPath.c_str()), "untitled.json");
+
+    if (result == NFD_CANCEL)
+        return;
+    if (result == NFD_ERROR) {
+        printf("Error: %s\n", NFD::GetError());
+        return;
+    }
+
+    std::filesystem::path path(reinterpret_cast<const char8_t*>(outPath.get()));
+    Serializer::saveSheet(path, GetCurrentSheet().GetCircuit(), GetCurrentSheet().GetSimulationSettings());
+}
+
+void App::LoadSheetFromFile()
+{
+    auto saveFolder = std::filesystem::current_path() / "saves";
+    nfdu8filteritem_t filters[] = { { "Latch circuit", "json" } };
+    std::u8string defaultPath = saveFolder.u8string();
+
+    NFD::UniquePathU8 outPath;
+    nfdresult_t result = NFD::OpenDialog(outPath, filters, 1,
+        reinterpret_cast<const char*>(defaultPath.c_str()));
+
+    if (result == NFD_CANCEL)
+        return;
+    if (result == NFD_ERROR) {
+        printf("Error: %s\n", NFD::GetError());
+        return;
+    }
+
+    std::filesystem::path path(reinterpret_cast<const char8_t*>(outPath.get()));
+    auto name = path.stem().string();
+	auto newSheet = std::make_unique<Sheet>();
+    Serializer::loadSheet(path, newSheet->GetCircuit(), newSheet->GetSimulationSettings());
+	newSheet->SetViewport({ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() });
+    newSheet->SetTitle(name);
+    sheets.push_back(std::move(newSheet));
+    current_sheet_index = sheets.size() - 1;
 }
 
 void App::Run()

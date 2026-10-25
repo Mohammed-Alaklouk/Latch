@@ -1,4 +1,5 @@
 #include "Wire.h"
+#include <nlohmann/json.hpp>
 
 Wire::Wire(int id, PinRef source, Vector2 sourcePos, PinRef destination, Vector2 destPos, Elbow first)
 	: ID(id), Value(LogicLevel::UNDEFINED)
@@ -452,3 +453,36 @@ void Wire::draw(const std::vector<int>& selectedNodeIDs, const std::vector<WireS
 Color Wire::SelectedColor = { 0, 150, 255, 255 };
 float Wire::NodeRadius = 5.0f;
 float Wire::SegmentThickness = 3.0f;
+
+
+void nlohmann::adl_serializer<Wire>::to_json(nlohmann::json& j, const Wire& w)
+{
+	j = {
+		{"id", w.ID},
+		{"value", static_cast<int>(w.Value)},
+		{
+			"nodeIDManager", {
+				{"indices", w.node_id_manager.getIndices()},
+				{"free_ids", w.node_id_manager.getFreeIds()}
+			}
+		},
+		
+		{"sourceNodeID", w.SourceNodeID},
+		{"destinationNodeIDs", w.DestinationNodeIDs},
+		{"nodes", nlohmann::json::array()},
+		{"segments", nlohmann::json::array()},
+	};
+
+	for (const auto& node : w.Nodes) {
+		j["nodes"].push_back({
+			{"pin", {node.Pin.ComponentID, node.Pin.PinIndex}},
+			{"position", {node.Position.x, node.Position.y}},
+			{"type", static_cast<int>(node.Type)},
+			{"id", node.ID}
+		});
+	}
+
+	for (const auto& segment : w.Segments) {
+		j["segments"].push_back({ segment.first, segment.second });
+	}
+}

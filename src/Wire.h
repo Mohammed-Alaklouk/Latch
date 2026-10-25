@@ -8,7 +8,8 @@
 #include <unordered_map>
 #include <stack>
 #include <algorithm>
-#include <nlohmann/json.hpp>
+
+#include <nlohmann/json_fwd.hpp>
 
 typedef std::pair<int, int> WireSegment; // pair of node IDs
 
@@ -29,7 +30,6 @@ public:
 	Wire(int id, PinRef source, Vector2 sourcePos, PinRef destination, Vector2 destPos, Elbow first = Elbow::HorizontalFirst);
 	Wire(const int id, const Wire& other, const std::unordered_map<int, int>& oldToNewComponentIDMap, const Vector2 displacement);
 	explicit Wire(const nlohmann::json& wireJson);
-
 
 	int findNodeAt(Vector2 pos) const;
 	WireSegment findSegmentAt(Vector2 pos) const;
@@ -243,4 +243,13 @@ private:
 	void removeRedundantNodes();           // collapse collinear degree-2 pass-through junctions
 	std::vector<WireNode> pruneOrphans();  // drop anything no longer reachable from the source
 	std::vector<WireNode> clearAll();      // tear the whole wire down, reporting its PIN nodes
+};
+
+// This is needed to allow nlohmann::json to serialize and deserialize the Wire class.
+// The function get() will use this serializer to read the Wire class from json.
+// The function to_json() will use this serializer to write the Wire class to json.
+template <>
+struct nlohmann::adl_serializer<Wire> {
+	static Wire from_json(const nlohmann::json& j) { return Wire(j); }
+	static void to_json(nlohmann::json& j, const Wire& w); 
 };

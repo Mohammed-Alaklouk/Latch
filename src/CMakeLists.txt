@@ -4,7 +4,8 @@ add_library(latch_core STATIC
     Gate.cpp Gate.h
     Wire.cpp Wire.h
     Serializer.cpp Serializer.h
-    ComponentInfo.h IdManager.h Action.h Pin.h
+    ComponentInfo.cpp ComponentInfo.h
+    IdManager.h Action.h Pin.h
 )
 
 # This is needed to make the header files available to other targets that link against this library

@@ -115,7 +115,7 @@ float Gate::orBodyLeftAt(float y) const
 	return m_rect.x + 2.0f * orBackDepth() * (1.0f - t) * t;
 }
 
-// Negation bubble filling the complement gate's last body cell (2*BubbleRadius == CELL_SIZE).
+// Negation bubble filling the complement gate's last body cell
 void Gate::drawBubble(Color borderColor) const
 {
 	float cy = m_rect.y + m_rect.height * 0.5f;

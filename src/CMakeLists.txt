@@ -3,7 +3,7 @@ add_library(latch_core STATIC
     Circuit.cpp Circuit.h
     Gate.cpp Gate.h
     Wire.cpp Wire.h
-    Serializer.cpp Serialize
+    Serializer.cpp Serializer.h
     ComponentInfo.cpp ComponentInfo.h
     IdManager.h Action.h Pin.h Settings.h
 )

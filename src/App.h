@@ -36,10 +36,4 @@ private:
 	char new_sheet_title[64] = ""; 
 
 	componentInfo::Type selected_gate_type = componentInfo::Type::AND;
-
-	UITheme darkTheme = {
-	{ 18, 18, 18, 255 },
-	{ 30, 30, 30, 255 },
-	{ 50, 50, 50, 255 },
-	};
 };

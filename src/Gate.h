@@ -176,9 +176,7 @@ public:
 
 	void draw(std::vector<LogicLevel>& inputs, bool selected, bool highlighted) const override
 	{
-		auto borderColor = Settings::CurrentTheme().Gates.Border;
-		if (highlighted) borderColor = Settings::CurrentTheme().Gates.BorderHighlight;
-		if (selected) borderColor = Settings::CurrentTheme().Selection;
+		auto borderColor = pickBorder(selected, highlighted);
 
 		DrawRectangleGradientV(m_rect.x, m_rect.y, m_rect.width, m_rect.height, Settings::CurrentTheme().Gates.BodyTop, Settings::CurrentTheme().Gates.BodyBot);
 		DrawRectangle(m_rect.x, m_rect.y, 3.0f, m_rect.height, Settings::CurrentTheme().Gates.Accent);
@@ -233,9 +231,7 @@ class ToggleGate : public Gate {
 
 	void draw(std::vector<LogicLevel>& inputs, bool selected, bool highlighted) const override
 	{
-		auto borderColor = Settings::CurrentTheme().Gates.Border;
-		if (highlighted) borderColor = Settings::CurrentTheme().Gates.BorderHighlight;
-		if (selected) borderColor = Settings::CurrentTheme().Selection;
+		auto borderColor = pickBorder(selected, highlighted);
 		DrawRectangleGradientV(m_rect.x, m_rect.y, m_rect.width, m_rect.height, Settings::CurrentTheme().Gates.BodyTop, Settings::CurrentTheme().Gates.BodyBot);
 		DrawRectangle(m_rect.x, m_rect.y, 3.0f, m_rect.height, Settings::CurrentTheme().Gates.Accent);
 		DrawRectangleRoundedLinesEx(m_rect, 0.1f, 4, 1.5f, borderColor);

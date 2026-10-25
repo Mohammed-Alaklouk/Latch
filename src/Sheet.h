@@ -71,6 +71,7 @@ public:
 	void Undo();
 	void Redo();
 	void StepSimulation();
+	void ResetHistory();
 
 	void SetInputs(MouseInputs input, bool shift_down, componentInfo::Type selected_gate_type) {
 		mouse_inputs = input;
@@ -81,12 +82,15 @@ public:
 	void SetViewport(Rectangle viewport);
 	void SetTitle(const std::string& title) { this->title = title; }
 	void SetFilePath(const std::filesystem::path& path) { this->file_path = path; }
+	void SetSaved() { lastSavedSnapshotID = action_manager.getCurrentSnapshotID(); }
+
 	const std::filesystem::path GetFilePath() const { return file_path; }
 	std::string GetTitle() const { return title; }
 	Rectangle GetViewport() const { return viewport; }
 	const Camera2D& GetCamera() const { return camera; }
 	Circuit& GetCircuit() { return circuit; }
 	SimulationSettings& GetSimulationSettings() { return simulation_settings; }
+	bool IsSaved() const { return lastSavedSnapshotID == action_manager.getCurrentSnapshotID(); }
 private:
 	void DrawGrid() const;
 
@@ -149,4 +153,6 @@ private:
 
 	std::string title;
 	std::filesystem::path file_path = {};
+
+	int lastSavedSnapshotID = -1;
 };

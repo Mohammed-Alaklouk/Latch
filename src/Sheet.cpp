@@ -10,6 +10,7 @@ Sheet::Sheet()
     camera.zoom = 1;
 
     action_manager.AddSnapshot(circuit.GetSnapshot("Initial state"));
+	lastSavedSnapshotID = action_manager.getCurrentSnapshotID();
     title = "New Sheet";
 }
 
@@ -344,6 +345,13 @@ void Sheet::StepSimulation()
 {
     circuit.evaluate();
     number_of_ticks++;
+}
+
+void Sheet::ResetHistory()
+{
+    action_manager.clear();
+    action_manager.AddSnapshot(circuit.GetSnapshot("Initial state"));
+	lastSavedSnapshotID = action_manager.getCurrentSnapshotID();
 }
 
 void Sheet::DrawGrid() const

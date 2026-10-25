@@ -184,8 +184,12 @@ void App::SaveCurrentSheet()
     }
 
     if (!(GetCurrentSheet().GetFilePath().empty())) {
-        Serializer::saveSheet(GetCurrentSheet().GetFilePath(), GetCurrentSheet().GetCircuit(), GetCurrentSheet().GetSimulationSettings());
-		return;
+        if (Serializer::saveSheet(GetCurrentSheet().GetFilePath(), GetCurrentSheet().GetCircuit()
+            ,GetCurrentSheet().GetSimulationSettings())) {
+
+            GetCurrentSheet().SetSaved();
+        }
+        return;
     }
 
     nfdu8filteritem_t filters[] = { { "Latch circuit", "json" } };
@@ -203,9 +207,11 @@ void App::SaveCurrentSheet()
     }
 
     std::filesystem::path path(reinterpret_cast<const char8_t*>(outPath.get()));
-    Serializer::saveSheet(path, GetCurrentSheet().GetCircuit(), GetCurrentSheet().GetSimulationSettings());
-	GetCurrentSheet().SetFilePath(path);
-    GetCurrentSheet().SetSaved();
+    if (Serializer::saveSheet(path, GetCurrentSheet().GetCircuit(), GetCurrentSheet().GetSimulationSettings())) {
+	    GetCurrentSheet().SetFilePath(path);
+		GetCurrentSheet().SetTitle(path.stem().string());
+        GetCurrentSheet().SetSaved();
+    }
 }
 
 void App::LoadSheetFromFile()
@@ -226,9 +232,20 @@ void App::LoadSheetFromFile()
     }
 
     std::filesystem::path path(reinterpret_cast<const char8_t*>(outPath.get()));
+	int index = 0;
+    for (auto& sheet : sheets) {
+        if (sheet->GetFilePath() == path) {
+            current_sheet_index = index;
+            return;
+        }
+		index++;
+	}
     auto name = path.stem().string();
 	auto newSheet = std::make_unique<Sheet>();
-    Serializer::loadSheet(path, newSheet->GetCircuit(), newSheet->GetSimulationSettings());
+    if (!Serializer::loadSheet(path, newSheet->GetCircuit(), newSheet->GetSimulationSettings())) {
+        return;
+    }
+
 	newSheet->SetViewport({ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() });
     newSheet->SetTitle(name);
 	newSheet->SetFilePath(path);

@@ -31,10 +31,17 @@ FetchContent_Declare(json
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
+FetchContent_Declare(nfd
+    GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended.git
+    GIT_TAG        v1.2.1
+    GIT_SHALLOW    TRUE
+)
+
 FetchContent_MakeAvailable(raylib)
 FetchContent_MakeAvailable(imgui)
 FetchContent_MakeAvailable(rlimgui)
 FetchContent_MakeAvailable(json)
+FetchContent_MakeAvailable(nfd)
 
 # --- ImGui core library ---
 add_library(imgui STATIC
@@ -62,5 +69,5 @@ option(LATCH_BUILD_TESTS "Build the Latch test suite" ${PROJECT_IS_TOP_LEVEL})
 if(LATCH_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
-endif()
+endif()  
 

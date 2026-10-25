@@ -17,4 +17,4 @@ target_link_libraries(latch_core PUBLIC raylib PUBLIC nlohmann_json::nlohmann_js
 
 
 add_executable(Latch main.cpp App.cpp App.h Sheet.cpp Sheet.h)
-target_link_libraries(Latch PRIVATE latch_core imgui rlImGui)
+target_link_libraries(Latch PRIVATE latch_core imgui rlImGui nfd)

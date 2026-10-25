@@ -153,7 +153,7 @@ void App::Draw()
     BeginDrawing();
 
     BeginMode2D(sheet.GetCamera());
-    ClearBackground(Settings::CurrentTheme().background);
+    ClearBackground(Settings::CurrentTheme().Background);
 	sheet.Draw();
 
     EndMode2D();

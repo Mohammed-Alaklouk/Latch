@@ -36,7 +36,7 @@ int Gate::outputPinContainsPoint(Vector2 point) const
 
 Color Gate::pickBorder(bool selected, bool highlighted) const
 {
-	if (selected) return Settings::CurrentTheme().selectionColor;
+	if (selected) return Settings::CurrentTheme().SelectionColor;
 	if (highlighted) return Settings::CurrentTheme().Gates.BorderHighlightColor;
 	return Settings::CurrentTheme().Gates.BorderColor;
 }
@@ -165,13 +165,13 @@ void Gate::draw(std::vector<LogicLevel>& inputs, bool selected, bool highlighted
 	// Output lead from the body edge out to the pin.
 	Vector2 out = getOutputPosition();
 	DrawLineEx({ m_rect.x + m_rect.width, out.y }, out, 2.0f, Settings::CurrentTheme().Gates.LeadColor);
-	DrawCircle(out.x, out.y, PinRadius, Settings::CurrentTheme().logicLevelColors[m_outputValues[0]]);
+	DrawCircle(out.x, out.y, PinRadius, Settings::CurrentTheme().LogicLevelColors[m_outputValues[0]]);
 
 	for (int i = 0; i < inputs.size(); i++) {
 		Vector2 pin = getInputPosition(i);
 		Vector2 join = { bodyLeftAt(pin.y), pin.y };
 		if (join.x - pin.x > 0.5f) DrawLineEx(pin, join, 2.0f, Settings::CurrentTheme().Gates.LeadColor);
-		DrawCircle(pin.x, pin.y, PinRadius, Settings::CurrentTheme().logicLevelColors[inputs[i]]);
+		DrawCircle(pin.x, pin.y, PinRadius, Settings::CurrentTheme().LogicLevelColors[inputs[i]]);
 		if (inputs[i] == LogicLevel::UNDEFINED) DrawCircle(pin.x, pin.y, PinRadius + 1.5f, Fade(RED, 0.4f));
 	}
 }

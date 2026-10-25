@@ -25,9 +25,9 @@ void Sheet::HandleInput()
     auto zoom_change = mouse_inputs.mouseWheelDelta;
     if (zoom_change)
     {
-        current_zoom += zoom_change * zoom_sensitivity;
-        if (current_zoom < min_zoom) current_zoom = min_zoom;
-        else if (current_zoom > max_zoom) current_zoom = max_zoom;
+        current_zoom += zoom_change * Settings::view::ZoomSensitivity;
+        if (current_zoom < Settings::view::MinZoom) current_zoom = Settings::view::MinZoom;
+        else if (current_zoom > Settings::view::MaxZoom) current_zoom = Settings::view::MaxZoom;
         camera.zoom = current_zoom;
     }
 
@@ -37,8 +37,8 @@ void Sheet::HandleInput()
     if (mouse_inputs.rightButtonDown && !gate_placed && is_mouse_over_viewport)
     {
         auto world_mouse_pos = mouse_inputs.mousePositionWorld;
-        world_mouse_pos.x = int(world_mouse_pos.x / cell_size) * cell_size;
-        world_mouse_pos.y = int(world_mouse_pos.y / cell_size) * cell_size;
+        world_mouse_pos.x = int(world_mouse_pos.x / Settings::grid::CellSize) * Settings::grid::CellSize;
+        world_mouse_pos.y = int(world_mouse_pos.y / Settings::grid::CellSize) * Settings::grid::CellSize;
         int new_id = circuit.addComponent(selected_gate_type, world_mouse_pos);
         auto& component = circuit.getComponent(new_id);
         action_manager.AddSnapshot(circuit.GetSnapshot("Added component"));
@@ -167,7 +167,7 @@ void Sheet::Draw()
         Vector2 start;
         Color line_color;
         auto world_mouse_pos = mouse_inputs.mousePositionWorld;
-        Vector2 destination_pos = { round(world_mouse_pos.x / cell_size) * cell_size, round(world_mouse_pos.y / cell_size) * cell_size };
+        Vector2 destination_pos = { round(world_mouse_pos.x / Settings::grid::CellSize) * Settings::grid::CellSize, round(world_mouse_pos.y / Settings::grid::CellSize) * Settings::grid::CellSize };
 
         if (connecting_context.type == ConnectingContext::ConnectionType::PIN)
         {
@@ -351,29 +351,29 @@ void Sheet::DrawGrid() const
     Vector2 min = GetScreenToWorld2D({ 0, 0 }, camera);
     Vector2 max = GetScreenToWorld2D({ (float)GetScreenWidth(), (float)GetScreenHeight() }, camera);
 
-    float startX = floor(min.x / cell_size) * cell_size;
-    float startY = floor(min.y / cell_size) * cell_size;
+    float startX = floor(min.x / Settings::grid::CellSize) * Settings::grid::CellSize;
+    float startY = floor(min.y / Settings::grid::CellSize) * Settings::grid::CellSize;
 
-    for (float x = startX; x <= max.x; x += cell_size) {
-        int lineIndex = (int)round(x / cell_size);
-        bool isMajor = (lineIndex % major_step == 0);
+    for (float x = startX; x <= max.x; x += Settings::grid::CellSize) {
+        int lineIndex = (int)round(x / Settings::grid::CellSize);
+        bool isMajor = (lineIndex % Settings::grid::MajorStep == 0);
 
-        Color color = isMajor ? darkTheme.gridMajor : darkTheme.gridMinor;
+        Color color = isMajor ? Settings::CurrentTheme().gridMajor : Settings::CurrentTheme().gridMinor;
 
-        float baseThickness = isMajor ? grid_line_major_thickness : grid_line_minor_thickness;
+        float baseThickness = isMajor ? Settings::grid::MajorThickness : Settings::grid::MinorThickness;
         float adjustedThickness = (baseThickness / camera.zoom);
         if (adjustedThickness < 1.0f / camera.zoom) adjustedThickness = 1.0f / camera.zoom;
 
         DrawLineEx({ x, min.y }, { x, max.y }, adjustedThickness, color);
     }
 
-    for (float y = startY; y <= max.y; y += cell_size) {
-        int lineIndex = (int)round(y / cell_size);
-        bool isMajor = (lineIndex % major_step == 0);
+    for (float y = startY; y <= max.y; y += Settings::grid::CellSize) {
+        int lineIndex = (int)round(y / Settings::grid::CellSize);
+        bool isMajor = (lineIndex % Settings::grid::MajorStep == 0);
 
-        Color color = isMajor ? darkTheme.gridMajor : darkTheme.gridMinor;
+        Color color = isMajor ? Settings::CurrentTheme().gridMajor : Settings::CurrentTheme().gridMinor;
 
-        float baseThickness = isMajor ? grid_line_major_thickness : grid_line_minor_thickness;
+        float baseThickness = isMajor ? Settings::grid::MajorThickness : Settings::grid::MinorThickness;
         float adjustedThickness = (baseThickness / camera.zoom);
         if (adjustedThickness < 1.0f / camera.zoom) adjustedThickness = 1.0f / camera.zoom;
 
@@ -433,7 +433,7 @@ void Sheet::UpdateIdleState()
                 connecting_context.sourceSegment = segment;
                 connecting_context.type = ConnectingContext::JUNCTION;
                 connecting_context.wireID = wire.ID;
-                connecting_context.sourcePos = { std::round(mouse_inputs.mousePositionWorld.x / cell_size) * cell_size, std::round(mouse_inputs.mousePositionWorld.y / cell_size) * cell_size };
+                connecting_context.sourcePos = { std::round(mouse_inputs.mousePositionWorld.x / Settings::grid::CellSize) * Settings::grid::CellSize, std::round(mouse_inputs.mousePositionWorld.y / Settings::grid::CellSize) * Settings::grid::CellSize };
                 current_mouse_state = MouseState::Connecting;
                 clearSelection();
 
@@ -615,8 +615,8 @@ void Sheet::UpdateDraggingState()
     }
 
     Vector2 delta = {
-        int(mouse_inputs.mousePositionWorld.x - dragging_context.initial_mouse_pos.x) / cell_size * cell_size - dragging_context.snapped_delta.x,
-        int(mouse_inputs.mousePositionWorld.y - dragging_context.initial_mouse_pos.y) / cell_size * cell_size - dragging_context.snapped_delta.y
+        int(mouse_inputs.mousePositionWorld.x - dragging_context.initial_mouse_pos.x) / Settings::grid::CellSize * Settings::grid::CellSize - dragging_context.snapped_delta.x,
+        int(mouse_inputs.mousePositionWorld.y - dragging_context.initial_mouse_pos.y) / Settings::grid::CellSize * Settings::grid::CellSize - dragging_context.snapped_delta.y
     };
 
     dragging_context.snapped_delta.x += delta.x;
@@ -627,8 +627,8 @@ void Sheet::UpdateDraggingState()
     Vector2 fromStart = { mouse_inputs.mousePositionWorld.x - dragging_context.initial_mouse_pos.x,
                           mouse_inputs.mousePositionWorld.y - dragging_context.initial_mouse_pos.y };
     float distSq = fromStart.x * fromStart.x + fromStart.y * fromStart.y;
-    const float resetDist = (float)cell_size;      // back near the start -> re-arm
-    const float armDist = (float)cell_size * 1.5f; // dragged this far -> lock the bend in
+    const float resetDist = (float)Settings::grid::CellSize;      // back near the start -> re-arm
+    const float armDist = (float)Settings::grid::CellSize * 1.5f; // dragged this far -> lock the bend in
 
     if (distSq < resetDist * resetDist)
         dragging_context.elbowLocked = false;
@@ -650,7 +650,7 @@ void Sheet::UpdateDraggingState()
 void Sheet::UpdateConnectingState()
 {
     if (!mouse_inputs.leftButtonDown) {
-        Vector2 destination_pos = { round(mouse_inputs.mousePositionWorld.x / cell_size) * cell_size, round(mouse_inputs.mousePositionWorld.y / cell_size) * cell_size };
+        Vector2 destination_pos = { round(mouse_inputs.mousePositionWorld.x / Settings::grid::CellSize) * Settings::grid::CellSize, round(mouse_inputs.mousePositionWorld.y / Settings::grid::CellSize) * Settings::grid::CellSize };
 
         if (connecting_context.type == ConnectingContext::JUNCTION) {
             auto& sourceWire = circuit.getWire(connecting_context.wireID);
@@ -743,8 +743,8 @@ void Sheet::UpdateConnectingState()
 
     Vector2 fromSource = { mouse_inputs.mousePositionWorld.x - dragSource.x, mouse_inputs.mousePositionWorld.y - dragSource.y };
     float distSq = fromSource.x * fromSource.x + fromSource.y * fromSource.y;
-    const float resetDist = (float)cell_size;      // back near the source -> re-arm
-    const float armDist = (float)cell_size * 1.5f; // dragged this far away -> lock the bend in
+    const float resetDist = (float)Settings::grid::CellSize;      // back near the source -> re-arm
+    const float armDist = (float)Settings::grid::CellSize * 1.5f; // dragged this far away -> lock the bend in
 
     if (distSq < resetDist * resetDist) {
         connecting_context.elbowLocked = false;

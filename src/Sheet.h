@@ -7,15 +7,6 @@
 #include "ComponentInfo.h"
 #include "Settings.h"
 
-struct UITheme {
-	Color background;
-	Color gridMinor;
-	Color gridMajor;
-	Color logicLow;    // Logic 0
-	Color logicHigh;   // Logic 1
-	Color logicX;      // Undefined
-};
-
 struct MouseInputs {
 	bool leftButtonDown			= false;
 	bool rightButtonDown		= false;
@@ -107,8 +98,6 @@ private:
 
 	Rectangle viewport;
 
-	int cell_size = CELL_SIZE;
-
 	enum class MouseState { Idle, Panning, Dragging, Connecting, Selecting };
 
 	void(Sheet::* mouse_state_update_functions[5])() = {
@@ -123,9 +112,6 @@ private:
 
 	Camera2D camera;
 
-	const float min_zoom = 0.3f;
-	const float max_zoom = 3.0f;
-	float zoom_sensitivity = 0.1f;
 	float current_zoom = 1.0f;
 
 
@@ -140,10 +126,6 @@ private:
 
 	bool gate_placed = false;
 
-	int major_step = 100 / CELL_SIZE;
-	float grid_line_minor_thickness = 0.8f;
-	float grid_line_major_thickness = 1.5f;
-
 	std::vector <int> selected_component_ids;
 	int hovered_component_id = -1;
 	std::unordered_map<int, std::vector<int>> selected_wire_nodes;
@@ -155,15 +137,6 @@ private:
 	int number_of_ticks = 0;
 
 	ActionManager action_manager;
-
-	UITheme darkTheme = {
-	{ 18, 18, 18, 255 },
-	{ 30, 30, 30, 255 },
-	{ 50, 50, 50, 255 },
-	{ 40, 60, 40, 255 },
-	{ 0, 255, 0, 255 },
-	{ 255, 165, 0, 255 }
-	};
 
 	MouseInputs mouse_inputs;
 	bool shift_down = false;

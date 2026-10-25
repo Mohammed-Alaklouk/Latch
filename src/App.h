@@ -7,6 +7,8 @@
 #include "imgui.h"
 
 #include "Sheet.h"
+#include "Settings.h"
+#include "Serializer.h"
 
 class App
 {
@@ -39,8 +41,5 @@ private:
 	{ 18, 18, 18, 255 },
 	{ 30, 30, 30, 255 },
 	{ 50, 50, 50, 255 },
-	{ 40, 60, 40, 255 },
-	{ 0, 255, 0, 255 },
-	{ 255, 165, 0, 255 }
 	};
 };

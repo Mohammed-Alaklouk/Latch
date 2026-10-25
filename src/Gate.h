@@ -188,7 +188,7 @@ public:
 		Vector2 pin = getInputPosition(0);
 		DrawLineEx({ m_rect.x, pin.y }, pin, 2.0f, Settings::CurrentTheme().Gates.LeadColor);
 		DrawCircle(pin.x, pin.y, PinRadius, fillColor);
-		if (inputs[0] == LogicLevel::UNDEFINED) fillColor = Fade(RED, 0.4f);
+		if (inputs[0] == LogicLevel::UNDEFINED) fillColor = Settings::CurrentTheme().UndefinedHaloColor;
 
 		DrawCircle(m_rect.x + m_rect.width / 2, m_rect.y + m_rect.height / 2, 20, fillColor);
 		DrawCircleLines(m_rect.x + m_rect.width / 2, m_rect.y + m_rect.height / 2, 20, borderColor);
@@ -248,7 +248,7 @@ class ToggleGate : public Gate {
 		int text_w = MeasureText(label, 12);
 		float tx = m_rect.x + (m_rect.width - text_w) * 0.5f;
 		float ty = m_rect.y + (m_rect.height - 12) * 0.5f;
-		DrawText(label, (int)tx, (int)ty, 12, WHITE);
+		DrawText(label, (int)tx, (int)ty, 12, Settings::CurrentTheme().LabelColor);
 
 		Vector2 out = getOutputPosition();
 		DrawLineEx({ m_rect.x + m_rect.width, out.y }, out, 2.0f, Settings::CurrentTheme().Gates.LeadColor);

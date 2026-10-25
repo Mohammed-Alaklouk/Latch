@@ -153,7 +153,7 @@ void Gate::drawBody(Color borderColor) const
 	int text_w = MeasureText(label, 12);
 	float tx = m_rect.x + (m_rect.width - text_w) * 0.5f;
 	float ty = m_rect.y + (m_rect.height - 12) * 0.5f;
-	DrawText(label, (int)tx, (int)ty, 12, WHITE);
+	DrawText(label, (int)tx, (int)ty, 12, Settings::CurrentTheme().LabelColor);
 }
 
 void Gate::draw(std::vector<LogicLevel>& inputs, bool selected, bool highlighted) const
@@ -172,6 +172,6 @@ void Gate::draw(std::vector<LogicLevel>& inputs, bool selected, bool highlighted
 		Vector2 join = { bodyLeftAt(pin.y), pin.y };
 		if (join.x - pin.x > 0.5f) DrawLineEx(pin, join, 2.0f, Settings::CurrentTheme().Gates.LeadColor);
 		DrawCircle(pin.x, pin.y, PinRadius, Settings::CurrentTheme().LogicLevelColors[inputs[i]]);
-		if (inputs[i] == LogicLevel::UNDEFINED) DrawCircle(pin.x, pin.y, PinRadius + 1.5f, Fade(RED, 0.4f));
+		if (inputs[i] == LogicLevel::UNDEFINED) DrawCircle(pin.x, pin.y, PinRadius + 1.5f, Settings::CurrentTheme().UndefinedHaloColor);
 	}
 }

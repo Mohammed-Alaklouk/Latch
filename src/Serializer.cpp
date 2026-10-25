@@ -40,37 +40,7 @@ nlohmann::json Serializer::serializeCircuit(const Circuit& circuit)
 	}
 
 	for (const auto& wire : snapshot.wires) {
-		nlohmann::json wireJson = {
-			{"id", wire.ID},
-			{"value", static_cast<int>(wire.Value)},
-
-			{
-				"nodeIDManager", {
-					{"indices", wire.node_id_manager.getIndices()},
-					{"free_ids", wire.node_id_manager.getFreeIds()}
-				}
-			},
-
-			{"sourceNodeID", wire.SourceNodeID},
-			{"destinationNodeIDs", wire.DestinationNodeIDs},
-			{"nodes", nlohmann::json::array()},
-			{"segments", nlohmann::json::array()},
-		};
-
-		for (const auto& node : wire.Nodes) {
-			wireJson["nodes"].push_back({
-				{"pin", {node.Pin.ComponentID, node.Pin.PinIndex}},
-				{"position", {node.Position.x, node.Position.y}},
-				{"type", static_cast<int>(node.Type)},
-				{"id", node.ID}
-			});
-		}
-
-		for (const auto& segment : wire.Segments) {
-			wireJson["segments"].push_back({segment.first, segment.second});
-		}
-		
-		circuitJson["wires"].push_back(wireJson);
+		circuitJson["wires"].push_back(wire);
 	}
 
 
@@ -111,8 +81,7 @@ bool Serializer::deserializeCircuit(const nlohmann::json& circuitJson, Circuit& 
 		}
 
 		for (const auto& wire: circuitJson.at("wires")) {
-			Wire newWire(wire);
-			snapshot.wires.push_back(newWire);
+			snapshot.wires.push_back(wire.get<Wire>());
 		}
 	}
 	catch (const std::exception& e)
@@ -124,3 +93,26 @@ bool Serializer::deserializeCircuit(const nlohmann::json& circuitJson, Circuit& 
 	circuit.RestoreSnapshot(snapshot);
 	return true;
 }
+/*
+
+nlohmann::json Serializer::serializeSettings(const SimulationSettings& settings)
+{
+	nlohmann::json settingsJson = {
+		{"ticksPerSecond", settings.ticks_per_second},
+	};
+	return settingsJson;
+}
+
+SimulationSettings Serializer::deserializeSettings(const nlohmann::json& settingsJson) {
+	SimulationSettings settings;
+	try {
+		settings.ticks_per_second = settingsJson.at("ticksPerSecond").get<float>();
+	}
+	catch (const std::exception& e) {
+		printf("Error: Invalid settings JSON format. %s\n", e.what());
+	}
+
+	return settings;
+}
+
+*/

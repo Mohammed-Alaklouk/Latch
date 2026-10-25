@@ -83,6 +83,7 @@ public:
 	Rectangle GetViewport() const { return viewport; }
 	const Camera2D& GetCamera() const { return camera; }
 	Circuit& GetCircuit() { return circuit; }
+	SimulationSettings& GetSimulationSettings() { return simulation_settings; }
 private:
 	void DrawGrid() const;
 

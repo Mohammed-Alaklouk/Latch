@@ -44,7 +44,6 @@ class ActionManager {
 		snapshots.clear();
 		snapshotIDs.clear();
 		currentIndex = -1;
-		nextSnapshotID = 0;
 	}
 
 	private:

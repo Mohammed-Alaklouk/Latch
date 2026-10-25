@@ -23,12 +23,18 @@ namespace Settings {
 		Color background;
 		Color gridMinor;
 		Color gridMajor;
+		Color LogicLevelColors[3];
 	};
 
 	inline constexpr UITheme DarkTheme { 
 		{18,18,18,255}, 
 		{30,30,30,255}, 
-		{50,50,50,255}
+		{50,50,50,255},
+		{
+			{60, 60, 60, 255}, // LOW
+			{0, 220, 80, 255}, // HIGH
+			{255, 150, 0, 255} // UNDEFINED
+		}
 	};
 
 	inline const UITheme& CurrentTheme() { return DarkTheme; }   

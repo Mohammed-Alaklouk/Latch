@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib.h"
+#include <nlohmann/json_fwd.hpp>
 
 struct SimulationSettings {
 	float TickRate = 0.5f;
@@ -65,5 +66,15 @@ namespace Settings {
 		}
 	};
 
-	inline const UITheme& CurrentTheme() { return DarkTheme; }   
+	inline const UITheme& CurrentTheme() { return DarkTheme; } 
+
+	void to_json(nlohmann::json& j, const GateColors& gates);
+	void from_json(const nlohmann::json& j, GateColors& gates);
+	void to_json(nlohmann::json& j, const UITheme& theme);
+	void from_json(const nlohmann::json& j, UITheme& theme);
 }
+
+void to_json(nlohmann::json& j, const SimulationSettings& settings);
+void from_json(const nlohmann::json& j, SimulationSettings& settings);
+void to_json(nlohmann::json& j, const Color& color);
+void from_json(const nlohmann::json& j, Color& color);

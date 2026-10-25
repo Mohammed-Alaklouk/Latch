@@ -57,11 +57,11 @@ void Sheet::Update(float deltaTime)
         (this->*mouse_state_update)();
     }
 
-    if (simulation_settings.is_running)
+    if (is_running)
     {
-        simulation_settings.time_since_last_tick += deltaTime;
-        if (simulation_settings.time_since_last_tick >= 1.0f / simulation_settings.ticks_per_second) {
-            simulation_settings.time_since_last_tick -= 1.0f / simulation_settings.ticks_per_second;
+        time_since_last_tick += deltaTime;
+        if (time_since_last_tick >= 1.0f / simulation_settings.tickRate) {
+            time_since_last_tick -= 1.0f / simulation_settings.tickRate;
 		    StepSimulation();
         }
     }
@@ -73,15 +73,15 @@ void Sheet::UI()
     if (ImGui::Button("Step")) 
 		StepSimulation();
 
-    if (ImGui::Button(simulation_settings.is_running ? "Stop" : "Run"))
-        simulation_settings.is_running = !simulation_settings.is_running;
+    if (ImGui::Button(is_running ? "Stop" : "Run"))
+        is_running = !is_running;
 
-    if (ImGui::SliderFloat("Ticks per second", &simulation_settings.ticks_per_second, 0.5f, 60.0f, "%.1f"))
+    if (ImGui::SliderFloat("Ticks per second", &simulation_settings.tickRate, 0.5f, 60.0f, "%.1f"))
     {
-        simulation_settings.time_since_last_tick = 0.0f;
+        time_since_last_tick = 0.0f;
     }
 
-    ImGui::Text("Ticks: %d", simulation_settings.number_of_ticks);
+    ImGui::Text("Ticks: %d", number_of_ticks);
 
     ImGui::End();
 
@@ -343,7 +343,7 @@ void Sheet::Redo()
 void Sheet::StepSimulation()
 {
     circuit.evaluate();
-    simulation_settings.number_of_ticks++;
+    number_of_ticks++;
 }
 
 void Sheet::DrawGrid() const

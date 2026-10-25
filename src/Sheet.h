@@ -5,6 +5,7 @@
 #include "Action.h"
 #include "Circuit.h"
 #include "ComponentInfo.h"
+#include "Settings.h"
 
 struct UITheme {
 	Color background;
@@ -60,14 +61,6 @@ struct SelectionContext {
 	Vector2 selectionEnd;
 	Rectangle selectionRect;
 };
-
-struct SimulationSettings {
-	bool is_running = false;
-	float ticks_per_second = 0.5f;
-	float time_since_last_tick = 0.0f;
-	int number_of_ticks = 0;
-};
-
 
 class Sheet
 
@@ -157,6 +150,9 @@ private:
 	std::unordered_map<int, std::vector<WireSegment>> selected_wire_segments;
 
 	SimulationSettings simulation_settings;
+	bool is_running = false;
+	float time_since_last_tick = 0.0f;
+	int number_of_ticks = 0;
 
 	ActionManager action_manager;
 

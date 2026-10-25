@@ -3,15 +3,14 @@
 #include <memory>
 #include "Pin.h"
 #include "ComponentInfo.h"
-
-#define CELL_SIZE 10.0f
+#include "Settings.h"
 
 class Gate {
 public:
 	Gate() = delete;
 	Gate(int id, Vector2 position, int numInputs, int numOutputs, float w)
 		// Even cell-height, min 40px, so the centre lands on the grid.
-		: m_id(id), m_rect({ position.x, position.y, w, (numInputs > 2 ? 2 * numInputs : 4) * CELL_SIZE })
+		: m_id(id), m_rect({ position.x, position.y, w, (numInputs > 2 ? 2 * numInputs : 4) * (float)Settings::grid::CellSize })
 	{
 		m_inputWireIds.resize(numInputs, -1);
 		m_outputWireIds.resize(numOutputs, -1);
@@ -59,7 +58,7 @@ public:
 	void drawXorBackArc(Color borderColor) const;
 
 	// OR back bulge, keyed to the 4-cell silhouette (not m_rect) so an OR and its NOR twin match.
-	float orBackDepth() const { return 4.0f * CELL_SIZE * 0.32f; }
+	float orBackDepth() const { return 4.0f * Settings::grid::CellSize * 0.32f; }
 	float orBodyLeftAt(float y) const;
 
 	constexpr static float BubbleRadius = 5.0f;
@@ -69,11 +68,11 @@ public:
 	{
 		int n = (int)m_inputWireIds.size();
 		float cy = m_rect.y + m_rect.height / 2;
-		return { m_rect.x - CELL_SIZE, cy + (input_index - (n - 1) / 2.0f) * 2 * CELL_SIZE };
+		return { m_rect.x - Settings::grid::CellSize, cy + (input_index - (n - 1) / 2.0f) * 2 * Settings::grid::CellSize };
 	}
 
 	virtual Vector2 getOutputPosition(int output_index = 0) const {
-		return { m_rect.x + m_rect.width + CELL_SIZE, m_rect.y + m_rect.height / 2 };
+		return { m_rect.x + m_rect.width + Settings::grid::CellSize, m_rect.y + m_rect.height / 2 };
 	}
 
 
@@ -103,7 +102,7 @@ public:
 		LogicLevel::LOW, LogicLevel::UNDEFINED,	LogicLevel::UNDEFINED // UNDEFINED
 	};
 
-	AndGate(int id, Vector2 position) : Gate(id, position, 2, 1, 4 * CELL_SIZE)	{	}
+	AndGate(int id, Vector2 position) : Gate(id, position, 2, 1, 4 * Settings::grid::CellSize)	{	}
 
 	void evaluate(const std::vector<LogicLevel>& inputs) override{
 		if (inputs.size() < 2) {
@@ -131,7 +130,7 @@ public:
 		LogicLevel::UNDEFINED,	LogicLevel::HIGH,	LogicLevel::UNDEFINED // UNDEFINED
 	};
 
-	OrGate(int id, Vector2 position) : Gate(id, position, 2, 1,  4 * CELL_SIZE)	{	}
+	OrGate(int id, Vector2 position) : Gate(id, position, 2, 1,  4 * Settings::grid::CellSize)	{	}
 
 	void evaluate(const std::vector<LogicLevel>& inputs) override{
 		if (inputs.size() < 2) {
@@ -157,7 +156,7 @@ class NotGate : public Gate {
 		LogicLevel::LOW,  // HIGH
 		LogicLevel::UNDEFINED // UNDEFINED
 	};
-	NotGate(int id, Vector2 position) : Gate(id, position, 1, 1, 5 * CELL_SIZE)	{	}
+	NotGate(int id, Vector2 position) : Gate(id, position, 1, 1, 5 * Settings::grid::CellSize)	{	}
 
 	void evaluate(const std::vector<LogicLevel>& inputs) override{
 		if (inputs.size() < 1) {
@@ -168,7 +167,7 @@ class NotGate : public Gate {
 	}
 
 	void drawBody(Color borderColor) const override {
-		fillOutline(notShape(m_rect.x + m_rect.width - CELL_SIZE), borderColor);
+		fillOutline(notShape(m_rect.x + m_rect.width - Settings::grid::CellSize), borderColor);
 		drawBubble(borderColor);
 	}
 
@@ -178,8 +177,8 @@ class NotGate : public Gate {
 
 class LedGate : public Gate {
 public:
-	LedGate(int id, Vector2 position) : Gate(id, position, 1, 0, 4 * CELL_SIZE) {
-		m_rect.height =  4 * CELL_SIZE;
+	LedGate(int id, Vector2 position) : Gate(id, position, 1, 0, 4 * Settings::grid::CellSize) {
+		m_rect.height =  4 * Settings::grid::CellSize;
 	}
 
 	void draw(std::vector<LogicLevel>& inputs, bool selected, bool highlighted) const override
@@ -223,9 +222,9 @@ public:
 
 class ToggleGate : public Gate {
 	public:
-	ToggleGate(int id, Vector2 position) : Gate(id, position, 0, 1, 4 * CELL_SIZE)
+	ToggleGate(int id, Vector2 position) : Gate(id, position, 0, 1, 4 * Settings::grid::CellSize)
 	{
-		m_rect.height =  4 * CELL_SIZE;
+		m_rect.height =  4 * Settings::grid::CellSize;
 		m_outputValues[0] = LogicLevel::LOW;
 	}
 
@@ -272,7 +271,7 @@ public:
 		LogicLevel::HIGH, LogicLevel::LOW,  LogicLevel::UNDEFINED, // HIGH
 		LogicLevel::UNDEFINED, LogicLevel::UNDEFINED, LogicLevel::UNDEFINED // UNDEFINED
 	};
-	NandGate(int id, Vector2 position) : Gate(id, position, 2, 1, 5 * CELL_SIZE) { }
+	NandGate(int id, Vector2 position) : Gate(id, position, 2, 1, 5 * Settings::grid::CellSize) { }
 	void evaluate(const std::vector<LogicLevel>& inputs) override {
 		if (inputs.size() < 2) {
 			m_outputValues[0] = LogicLevel::UNDEFINED;
@@ -281,7 +280,7 @@ public:
 		m_outputValues[0] = LookupTable[inputs[0] * 3 + inputs[1]];
 	}
 	void drawBody(Color borderColor) const override {
-		fillOutline(andShape(m_rect.x + m_rect.width - CELL_SIZE), borderColor);
+		fillOutline(andShape(m_rect.x + m_rect.width - Settings::grid::CellSize), borderColor);
 		drawBubble(borderColor);
 	}
 	const char* getLabel() const override { return "NAND"; }
@@ -296,7 +295,7 @@ public:
 		LogicLevel::LOW,		LogicLevel::LOW, LogicLevel::LOW, // HIGH
 		LogicLevel::UNDEFINED,	LogicLevel::LOW, LogicLevel::UNDEFINED // UNDEFINED
 	};
-	NorGate(int id, Vector2 position) : Gate(id, position, 2, 1,  5 * CELL_SIZE) { }
+	NorGate(int id, Vector2 position) : Gate(id, position, 2, 1,  5 * Settings::grid::CellSize) { }
 	void evaluate(const std::vector<LogicLevel>& inputs) override {
 		if (inputs.size() < 2) {
 			m_outputValues[0] = LogicLevel::UNDEFINED;
@@ -305,7 +304,7 @@ public:
 		m_outputValues[0] = LookupTable[inputs[0] * 3 + inputs[1]];
 	}
 	void drawBody(Color borderColor) const override {
-		fillOutline(orShape(m_rect.x + m_rect.width - CELL_SIZE), borderColor);
+		fillOutline(orShape(m_rect.x + m_rect.width - Settings::grid::CellSize), borderColor);
 		drawBubble(borderColor);
 	}
 	float bodyLeftAt(float y) const override { return orBodyLeftAt(y); }
@@ -321,7 +320,7 @@ class XorGate : public Gate {
 		LogicLevel::HIGH,	LogicLevel::LOW,	LogicLevel::UNDEFINED, // HIGH
 		LogicLevel::UNDEFINED, LogicLevel::UNDEFINED, LogicLevel::UNDEFINED // UNDEFINED
 	};
-	XorGate(int id, Vector2 position) : Gate(id, position, 2, 1,  4 * CELL_SIZE) { }
+	XorGate(int id, Vector2 position) : Gate(id, position, 2, 1,  4 * Settings::grid::CellSize) { }
 	void evaluate(const std::vector<LogicLevel>& inputs) override {
 		if (inputs.size() < 2) {
 			m_outputValues[0] = LogicLevel::UNDEFINED;
@@ -347,7 +346,7 @@ class XnorGate : public Gate {
 		LogicLevel::LOW,	LogicLevel::HIGH,	LogicLevel::UNDEFINED, // HIGH
 		LogicLevel::UNDEFINED, LogicLevel::UNDEFINED, LogicLevel::UNDEFINED // UNDEFINED
 	};
-	XnorGate(int id, Vector2 position) : Gate(id, position, 2, 1,  5 * CELL_SIZE) { }
+	XnorGate(int id, Vector2 position) : Gate(id, position, 2, 1,  5 * Settings::grid::CellSize) { }
 	void evaluate(const std::vector<LogicLevel>& inputs) override {
 		if (inputs.size() < 2) {
 			m_outputValues[0] = LogicLevel::UNDEFINED;
@@ -356,7 +355,7 @@ class XnorGate : public Gate {
 		m_outputValues[0] = LookupTable[inputs[0] * 3 + inputs[1]];
 	}
 	void drawBody(Color borderColor) const override {
-		fillOutline(orShape(m_rect.x + m_rect.width - CELL_SIZE), borderColor);
+		fillOutline(orShape(m_rect.x + m_rect.width - Settings::grid::CellSize), borderColor);
 		drawBubble(borderColor);
 		drawXorBackArc(borderColor);
 	}

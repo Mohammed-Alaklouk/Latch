@@ -36,9 +36,9 @@ int Gate::outputPinContainsPoint(Vector2 point) const
 
 Color Gate::pickBorder(bool selected, bool highlighted) const
 {
-	if (selected) return Settings::CurrentTheme().SelectionColor;
-	if (highlighted) return Settings::CurrentTheme().Gates.BorderHighlightColor;
-	return Settings::CurrentTheme().Gates.BorderColor;
+	if (selected) return Settings::CurrentTheme().Selection;
+	if (highlighted) return Settings::CurrentTheme().Gates.BorderHighlight;
+	return Settings::CurrentTheme().Gates.Border;
 }
 
 // Fill a closed silhouette and trace its outline; fan both windings since raylib culls back-facing triangles and the shapes wind opposite ways.
@@ -146,14 +146,14 @@ void Gate::drawBody(Color borderColor) const
 {
 	// Fallback for gates without a distinctive shape: rounded body with a centred label.
 	DrawRectangleGradientV(m_rect.x, m_rect.y, m_rect.width, m_rect.height, Settings::CurrentTheme().Gates.BodyTop, Settings::CurrentTheme().Gates.BodyBot);
-	DrawRectangle(m_rect.x, m_rect.y, 3.0f, m_rect.height, Settings::CurrentTheme().Gates.AccentColor);
+	DrawRectangle(m_rect.x, m_rect.y, 3.0f, m_rect.height, Settings::CurrentTheme().Gates.Accent);
 	DrawRectangleRoundedLinesEx(m_rect, 0.1f, 4, 1.5f, borderColor);
 
 	const char* label = getLabel();
 	int text_w = MeasureText(label, 12);
 	float tx = m_rect.x + (m_rect.width - text_w) * 0.5f;
 	float ty = m_rect.y + (m_rect.height - 12) * 0.5f;
-	DrawText(label, (int)tx, (int)ty, 12, Settings::CurrentTheme().LabelColor);
+	DrawText(label, (int)tx, (int)ty, 12, Settings::CurrentTheme().Label);
 }
 
 void Gate::draw(std::vector<LogicLevel>& inputs, bool selected, bool highlighted) const
@@ -164,14 +164,14 @@ void Gate::draw(std::vector<LogicLevel>& inputs, bool selected, bool highlighted
 
 	// Output lead from the body edge out to the pin.
 	Vector2 out = getOutputPosition();
-	DrawLineEx({ m_rect.x + m_rect.width, out.y }, out, 2.0f, Settings::CurrentTheme().Gates.LeadColor);
-	DrawCircle(out.x, out.y, PinRadius, Settings::CurrentTheme().LogicLevelColors[m_outputValues[0]]);
+	DrawLineEx({ m_rect.x + m_rect.width, out.y }, out, 2.0f, Settings::CurrentTheme().Gates.Lead);
+	DrawCircle(out.x, out.y, PinRadius, Settings::CurrentTheme().LogicLevel[m_outputValues[0]]);
 
 	for (int i = 0; i < inputs.size(); i++) {
 		Vector2 pin = getInputPosition(i);
 		Vector2 join = { bodyLeftAt(pin.y), pin.y };
-		if (join.x - pin.x > 0.5f) DrawLineEx(pin, join, 2.0f, Settings::CurrentTheme().Gates.LeadColor);
-		DrawCircle(pin.x, pin.y, PinRadius, Settings::CurrentTheme().LogicLevelColors[inputs[i]]);
-		if (inputs[i] == LogicLevel::UNDEFINED) DrawCircle(pin.x, pin.y, PinRadius + 1.5f, Settings::CurrentTheme().UndefinedHaloColor);
+		if (join.x - pin.x > 0.5f) DrawLineEx(pin, join, 2.0f, Settings::CurrentTheme().Gates.Lead);
+		DrawCircle(pin.x, pin.y, PinRadius, Settings::CurrentTheme().LogicLevel[inputs[i]]);
+		if (inputs[i] == LogicLevel::UNDEFINED) DrawCircle(pin.x, pin.y, PinRadius + 1.5f, Settings::CurrentTheme().UndefinedHalo);
 	}
 }

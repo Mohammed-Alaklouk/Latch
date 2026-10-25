@@ -176,19 +176,19 @@ public:
 
 	void draw(std::vector<LogicLevel>& inputs, bool selected, bool highlighted) const override
 	{
-		auto borderColor = Settings::CurrentTheme().Gates.BorderColor;
-		if (highlighted) borderColor = Settings::CurrentTheme().Gates.BorderHighlightColor;
-		if (selected) borderColor = Settings::CurrentTheme().SelectionColor;
+		auto borderColor = Settings::CurrentTheme().Gates.Border;
+		if (highlighted) borderColor = Settings::CurrentTheme().Gates.BorderHighlight;
+		if (selected) borderColor = Settings::CurrentTheme().Selection;
 
 		DrawRectangleGradientV(m_rect.x, m_rect.y, m_rect.width, m_rect.height, Settings::CurrentTheme().Gates.BodyTop, Settings::CurrentTheme().Gates.BodyBot);
-		DrawRectangle(m_rect.x, m_rect.y, 3.0f, m_rect.height, Settings::CurrentTheme().Gates.AccentColor);
+		DrawRectangle(m_rect.x, m_rect.y, 3.0f, m_rect.height, Settings::CurrentTheme().Gates.Accent);
 		DrawRectangleRoundedLinesEx(m_rect, 0.1f, 4, 1.5f, borderColor);
 
-		Color fillColor = Settings::CurrentTheme().LogicLevelColors[inputs[0]];
+		Color fillColor = Settings::CurrentTheme().LogicLevel[inputs[0]];
 		Vector2 pin = getInputPosition(0);
-		DrawLineEx({ m_rect.x, pin.y }, pin, 2.0f, Settings::CurrentTheme().Gates.LeadColor);
+		DrawLineEx({ m_rect.x, pin.y }, pin, 2.0f, Settings::CurrentTheme().Gates.Lead);
 		DrawCircle(pin.x, pin.y, PinRadius, fillColor);
-		if (inputs[0] == LogicLevel::UNDEFINED) fillColor = Settings::CurrentTheme().UndefinedHaloColor;
+		if (inputs[0] == LogicLevel::UNDEFINED) fillColor = Settings::CurrentTheme().UndefinedHalo;
 
 		DrawCircle(m_rect.x + m_rect.width / 2, m_rect.y + m_rect.height / 2, 20, fillColor);
 		DrawCircleLines(m_rect.x + m_rect.width / 2, m_rect.y + m_rect.height / 2, 20, borderColor);
@@ -233,14 +233,14 @@ class ToggleGate : public Gate {
 
 	void draw(std::vector<LogicLevel>& inputs, bool selected, bool highlighted) const override
 	{
-		auto borderColor = Settings::CurrentTheme().Gates.BorderColor;
-		if (highlighted) borderColor = Settings::CurrentTheme().Gates.BorderHighlightColor;
-		if (selected) borderColor = Settings::CurrentTheme().SelectionColor;
+		auto borderColor = Settings::CurrentTheme().Gates.Border;
+		if (highlighted) borderColor = Settings::CurrentTheme().Gates.BorderHighlight;
+		if (selected) borderColor = Settings::CurrentTheme().Selection;
 		DrawRectangleGradientV(m_rect.x, m_rect.y, m_rect.width, m_rect.height, Settings::CurrentTheme().Gates.BodyTop, Settings::CurrentTheme().Gates.BodyBot);
-		DrawRectangle(m_rect.x, m_rect.y, 3.0f, m_rect.height, Settings::CurrentTheme().Gates.AccentColor);
+		DrawRectangle(m_rect.x, m_rect.y, 3.0f, m_rect.height, Settings::CurrentTheme().Gates.Accent);
 		DrawRectangleRoundedLinesEx(m_rect, 0.1f, 4, 1.5f, borderColor);
 		
-		Color fillColor = Settings::CurrentTheme().LogicLevelColors[m_outputValues[0]];
+		Color fillColor = Settings::CurrentTheme().LogicLevel[m_outputValues[0]];
 		DrawCircle(m_rect.x + m_rect.width / 2, m_rect.y + m_rect.height / 2, 20, fillColor);
 		DrawCircleLines(m_rect.x + m_rect.width / 2, m_rect.y + m_rect.height / 2, 20, borderColor);
 		
@@ -248,11 +248,11 @@ class ToggleGate : public Gate {
 		int text_w = MeasureText(label, 12);
 		float tx = m_rect.x + (m_rect.width - text_w) * 0.5f;
 		float ty = m_rect.y + (m_rect.height - 12) * 0.5f;
-		DrawText(label, (int)tx, (int)ty, 12, Settings::CurrentTheme().LabelColor);
+		DrawText(label, (int)tx, (int)ty, 12, Settings::CurrentTheme().Label);
 
 		Vector2 out = getOutputPosition();
-		DrawLineEx({ m_rect.x + m_rect.width, out.y }, out, 2.0f, Settings::CurrentTheme().Gates.LeadColor);
-		DrawCircle(out.x, out.y, PinRadius, Settings::CurrentTheme().LogicLevelColors[m_outputValues[0]]);
+		DrawLineEx({ m_rect.x + m_rect.width, out.y }, out, 2.0f, Settings::CurrentTheme().Gates.Lead);
+		DrawCircle(out.x, out.y, PinRadius, Settings::CurrentTheme().LogicLevel[m_outputValues[0]]);
 	}
 };
 

@@ -2,7 +2,7 @@
 #include "raylib.h"
 
 struct SimulationSettings {
-	float tickRate = 0.5f;
+	float TickRate = 0.5f;
 };
 
 namespace Settings {
@@ -22,22 +22,22 @@ namespace Settings {
 	struct GateColors {
 		Color BodyTop;
 		Color BodyBot;
-		Color AccentColor;
-		Color BorderColor;
-		Color BorderHighlightColor;
-		Color LeadColor; // short stubs joining pins to the body
+		Color Accent;
+		Color Border;
+		Color BorderHighlight;
+		Color Lead; // short stubs joining pins to the body
 	};
 
 	struct UITheme {
 		Color Background;
 		Color GridMinor;
 		Color GridMajor;
-		Color SelectionColor;
-		Color LabelColor;
+		Color Selection;
+		Color Label;
 		Color SelectionRectangleFill;
 		Color SelectionRectangleOutline;
-		Color UndefinedHaloColor;
-		Color LogicLevelColors[3];
+		Color UndefinedHalo;
+		Color LogicLevel[3];
 		GateColors Gates;
 	};
 
@@ -45,12 +45,12 @@ namespace Settings {
 		.Background					= {18,18,18,255},			
 		.GridMinor					= {30,30,30,255},			
 		.GridMajor					= {50,50,50,255},			
-		.SelectionColor				= {0, 150, 255, 255},		
-		.LabelColor					= WHITE,
+		.Selection				= {0, 150, 255, 255},		
+		.Label					= WHITE,
 		.SelectionRectangleFill		= {255,0,0,50},
 		.SelectionRectangleOutline	= RED,
-		.UndefinedHaloColor			= {230, 40, 55, 100 },
-		.LogicLevelColors = {
+		.UndefinedHalo			= {230, 40, 55, 100 },
+		.LogicLevel = {
 			{60, 60, 60, 255},		// LOW
 			{0, 220, 80, 255},		// HIGH
 			{255, 150, 0, 255}		// UNDEFINED
@@ -58,10 +58,10 @@ namespace Settings {
 		.Gates = {
 			.BodyTop				= { 45, 50, 62, 255 },		
 			.BodyBot				= { 32, 36, 46, 255 },		
-			.AccentColor			= { 0, 180, 120, 255 },		
-			.BorderColor			= { 80, 85, 95, 255 },		
-			.BorderHighlightColor	= { 100, 160, 255, 255 },	
-			.LeadColor				= { 90, 95, 110, 255 },		
+			.Accent			= { 0, 180, 120, 255 },		
+			.Border			= { 80, 85, 95, 255 },		
+			.BorderHighlight	= { 100, 160, 255, 255 },	
+			.Lead				= { 90, 95, 110, 255 },		
 		}
 	};
 

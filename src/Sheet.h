@@ -90,7 +90,7 @@ public:
 	const Camera2D& GetCamera() const { return camera; }
 	Circuit& GetCircuit() { return circuit; }
 	SimulationSettings& GetSimulationSettings() { return simulation_settings; }
-	bool IsSaved() const { return lastSavedSnapshotID == action_manager.getCurrentSnapshotID(); }
+	bool IsSaved() const { return (lastSavedSnapshotID == action_manager.getCurrentSnapshotID()) && !file_path.empty(); }
 private:
 	void DrawGrid() const;
 

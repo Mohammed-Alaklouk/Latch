@@ -27,6 +27,9 @@ private:
 	void SaveCurrentSheetAs();
 	void LoadSheetFromFile();
 
+	void MenuBar();
+	void TabBar();
+
 	void GetMouseInputs(MouseInputs& mouse_inputs);
 	Sheet& GetCurrentSheet() { return *sheets[current_sheet_index]; }
 	inline void CreateSaveFolder();
@@ -38,9 +41,9 @@ private:
 	int current_sheet_index = 0;
 	Clipboard clipboard;
 
-	char new_sheet_title[64] = ""; 
-
 	componentInfo::Type selected_gate_type = componentInfo::Type::AND;
 	NFD::Guard nfd_guard;
 	std::filesystem::path saveFolder = std::filesystem::path(GetApplicationDirectory()) / "saves";
+
+	int requested_tab = -1;
 };

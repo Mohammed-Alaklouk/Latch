@@ -1,4 +1,5 @@
 #include "App.h"
+#include "imgui_internal.h"
 
 App::App()
 {
@@ -87,16 +88,8 @@ void App::UI()
 {
     rlImGuiBegin();
 
-    ImGui::Begin("file");
-    if (ImGui::Button("Save"))
-        SaveCurrentSheet();
-    if (ImGui::Button("Save as"))
-        SaveCurrentSheetAs();
-
-    if (ImGui::Button("Load file"))
-        LoadSheetFromFile();
-
-    ImGui::End();
+	MenuBar();
+	TabBar();
 
     ImGui::Begin("Components");
 
@@ -120,57 +113,6 @@ void App::UI()
         selected_gate_type = componentInfo::Type::TOGGLE;
     ImGui::End();
 
-    ImGui::Begin("Sheets");
-    int index = 0;
-    for (auto sheet = sheets.begin(); sheet != sheets.end();)
-    {
-        bool should_delete = ImGui::Button(("Delete##" + std::to_string(index)).c_str());
-
-        ImGui::SameLine();
-
-		auto title = (*sheet)->GetTitle();
-        if (!(*sheet)->IsSaved() || (*sheet)->GetFilePath().empty())
-			title += "*";
-
-        if (ImGui::Button((title + "##" + std::to_string(index)).c_str()))
-            current_sheet_index = index;
-
-        if (current_sheet_index == index)
-        {
-            ImGui::SameLine();
-            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Current");
-        }
-
-        if (should_delete && sheets.size() > 1)
-        {
-            sheet = sheets.erase(sheet);
-            if (current_sheet_index > index)          // strictly greater: only shift when above
-                current_sheet_index--;
-            else if (current_sheet_index == index)    // deleted the active sheet
-                current_sheet_index = (index > 0) ? index - 1 : 0;
-
-
-            continue;
-        }
-        index++;
-        sheet++;
-    }
-
-    ImGui::InputText("Sheet Title", new_sheet_title, sizeof(new_sheet_title));
-    ImGui::SameLine();
-    if (ImGui::Button("Add Sheet"))
-    {
-        sheets.push_back(std::make_unique<Sheet>());
-        sheets.back()->SetViewport({ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() });
-        sheets.back()->SetTitle(new_sheet_title);
-        if (new_sheet_title[0] == '\0')
-            sheets.back()->SetTitle("Untitled Sheet" + std::to_string(sheets.size()));
-
-        current_sheet_index = sheets.size() - 1;
-        new_sheet_title[0] = '\0';   // clear the input for the next sheet
-    }
-    ImGui::End();
-
     GetCurrentSheet().UI();
     rlImGuiEnd();
 }
@@ -189,7 +131,6 @@ void App::Draw()
     UI();
     EndDrawing();
 }
-
 
 void App::SaveCurrentSheet()
 {
@@ -235,7 +176,6 @@ void App::SaveCurrentSheetAs()
 
 void App::LoadSheetFromFile()
 {
-    auto saveFolder = std::filesystem::current_path() / "saves";
     nfdu8filteritem_t filters[] = { { "Latch circuit", "json" } };
     std::u8string defaultPath = saveFolder.u8string();
 
@@ -254,7 +194,7 @@ void App::LoadSheetFromFile()
 	int index = 0;
     for (auto& sheet : sheets) {
         if (sheet->GetFilePath() == path) {
-            current_sheet_index = index;
+            requested_tab = index;
             return;
         }
 		index++;
@@ -270,7 +210,84 @@ void App::LoadSheetFromFile()
 	newSheet->SetFilePath(path);
 	newSheet->ResetHistory();
     sheets.push_back(std::move(newSheet));
-    current_sheet_index = sheets.size() - 1;
+    requested_tab = sheets.size() - 1;
+}
+
+void App::MenuBar()
+{
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("Save", "Ctrl+S"))
+                SaveCurrentSheet();
+            if (ImGui::MenuItem("Save as"))
+                SaveCurrentSheetAs();
+            if (ImGui::MenuItem("Load file"))
+                LoadSheetFromFile();
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+	}
+}
+
+void App::TabBar()
+{
+    float height = ImGui::GetFrameHeight() + ImGui::GetStyle().WindowPadding.y * 2;
+    if (ImGui::BeginViewportSideBar("##SheetTabs", ImGui::GetMainViewport(), ImGuiDir_Up, height,
+        ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings))
+    {
+        ImGuiTabBarFlags flags = ImGuiTabBarFlags_Reorderable | ImGuiTabBarFlags_FittingPolicyScroll;
+        if (ImGui::BeginTabBar("Sheets", flags)) { 
+            int index = 0;
+            for (auto sheet = sheets.begin(); sheet != sheets.end();)
+            {
+                auto title = sheet->get()->GetTitle();
+                ImGuiTabItemFlags tabFlags = 0;
+                if (!sheet->get()->IsSaved())
+                    tabFlags |= ImGuiTabItemFlags_UnsavedDocument;
+
+                if (requested_tab == index) {
+					tabFlags |= ImGuiTabItemFlags_SetSelected;
+                    requested_tab = -1;
+				}
+
+                bool tab_open = true;
+                ImGui::PushID(sheet->get());
+				// I pass nullptr for the open state if there's only one tab so it can not be closed
+                if (ImGui::BeginTabItem((title + "###tab").c_str(), sheets.size() > 1 ? &tab_open : nullptr, tabFlags)) {
+                    current_sheet_index = index;
+                    ImGui::EndTabItem();
+                }
+                ImGui::PopID();
+
+                if (!tab_open && sheets.size() > 1) {
+                    sheet = sheets.erase(sheet);
+                    if (current_sheet_index >= index && current_sheet_index > 0)
+                        current_sheet_index--;
+                    continue;
+                }
+                else {
+                    sheet++;
+                    index++;
+                }
+
+            }
+
+            std::string new_sheet_title = "Untitled Sheet" + std::to_string(sheets.size() + 1);
+            if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip))
+            {
+                sheets.push_back(std::make_unique<Sheet>());
+                sheets.back()->SetViewport({ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() });
+                sheets.back()->SetTitle(new_sheet_title);
+
+                requested_tab = sheets.size() - 1;
+            }
+
+            ImGui::EndTabBar();
+        }
+    }
+    ImGui::End();   
 }
 
 void App::Run()

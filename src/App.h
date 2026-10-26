@@ -24,11 +24,13 @@ private:
 	void UI();
 	void Draw();
 	void SaveCurrentSheet();
+	void SaveCurrentSheetAs();
 	void LoadSheetFromFile();
 
 	void GetMouseInputs(MouseInputs& mouse_inputs);
 	Sheet& GetCurrentSheet() { return *sheets[current_sheet_index]; }
-
+	inline void CreateSaveFolder();
+	
 	int window_width = 800;
 	int window_height = 450;
 
@@ -40,4 +42,5 @@ private:
 
 	componentInfo::Type selected_gate_type = componentInfo::Type::AND;
 	NFD::Guard nfd_guard;
+	std::filesystem::path saveFolder = std::filesystem::path(GetApplicationDirectory()) / "saves";
 };

@@ -11,7 +11,7 @@ App::App()
 
 	sheets.push_back(std::make_unique<Sheet>());
 	GetCurrentSheet().SetViewport({ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() });
-    
+        
     SetTargetFPS(60);
     rlImGuiSetup(true);
 }
@@ -29,6 +29,18 @@ void App::GetMouseInputs(MouseInputs& mouse_inputs)
     mouse_inputs.mousePositionScreen = GetMousePosition();
     mouse_inputs.mousePositionWorld = GetScreenToWorld2D(GetMousePosition(), GetCurrentSheet().GetCamera());
     mouse_inputs.mouseWheelDelta = GetMouseWheelMove();
+}
+
+inline void App::CreateSaveFolder()
+{
+	std::error_code ec;
+    if (!std::filesystem::exists(saveFolder, ec)) {
+        std::filesystem::create_directory(saveFolder, ec);
+	}
+
+    if (ec) {
+        printf("Error creating save folder: %s\n", ec.message().c_str());
+	}
 }
 
 void App::HandleInput()
@@ -79,7 +91,7 @@ void App::UI()
     if (ImGui::Button("Save"))
         SaveCurrentSheet();
     if (ImGui::Button("Save as"))
-        SaveCurrentSheet();
+        SaveCurrentSheetAs();
 
     if (ImGui::Button("Load file"))
         LoadSheetFromFile();
@@ -178,28 +190,32 @@ void App::Draw()
     EndDrawing();
 }
 
+
 void App::SaveCurrentSheet()
 {
-	auto saveFolder = std::filesystem::current_path() / "saves";
-    if (!std::filesystem::exists(saveFolder)) {
-        std::filesystem::create_directory(saveFolder);
-    }
-
-    if (!(GetCurrentSheet().GetFilePath().empty())) {
-        if (Serializer::saveSheet(GetCurrentSheet().GetFilePath(), GetCurrentSheet().GetCircuit()
-            ,GetCurrentSheet().GetSimulationSettings())) {
-
-            GetCurrentSheet().SetSaved();
-        }
+	CreateSaveFolder();
+    if (GetCurrentSheet().GetFilePath().empty()) {
+        SaveCurrentSheetAs();
         return;
-    }
+	}
 
+	auto& sheet = GetCurrentSheet();
+    bool success = Serializer::saveSheet(sheet.GetFilePath(), sheet.GetCircuit(), sheet.GetSimulationSettings());
+    if (success) 
+        sheet.SetSaved();
+}
+
+void App::SaveCurrentSheetAs()
+{
+	CreateSaveFolder();
+
+    auto& sheet = GetCurrentSheet();
     nfdu8filteritem_t filters[] = { { "Latch circuit", "json" } };
     std::u8string defaultPath = saveFolder.u8string();
 
     NFD::UniquePathU8 outPath;
     nfdresult_t result = NFD::SaveDialog(outPath, filters, 1,
-        reinterpret_cast<const char*>(defaultPath.c_str()), "untitled.json");
+        reinterpret_cast<const char*>(defaultPath.c_str()), (sheet.GetTitle() + ".json").c_str());
 
     if (result == NFD_CANCEL)
         return;
@@ -209,10 +225,11 @@ void App::SaveCurrentSheet()
     }
 
     std::filesystem::path path(reinterpret_cast<const char8_t*>(outPath.get()));
-    if (Serializer::saveSheet(path, GetCurrentSheet().GetCircuit(), GetCurrentSheet().GetSimulationSettings())) {
-	    GetCurrentSheet().SetFilePath(path);
-		GetCurrentSheet().SetTitle(path.stem().string());
-        GetCurrentSheet().SetSaved();
+    if (Serializer::saveSheet(path, sheet.GetCircuit(), sheet.GetSimulationSettings())) {
+        std::u8string name = path.stem().u8string();
+        sheet.SetFilePath(path);
+        sheet.SetTitle(std::string(name.begin(), name.end()));
+        sheet.SetSaved();
     }
 }
 
@@ -242,14 +259,14 @@ void App::LoadSheetFromFile()
         }
 		index++;
 	}
-    auto name = path.stem().string();
-	auto newSheet = std::make_unique<Sheet>();
+    auto newSheet = std::make_unique<Sheet>();
     if (!Serializer::loadSheet(path, newSheet->GetCircuit(), newSheet->GetSimulationSettings())) {
         return;
     }
 
+    std::u8string name = path.stem().u8string();
 	newSheet->SetViewport({ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() });
-    newSheet->SetTitle(name);
+    newSheet->SetTitle(std::string(name.begin(), name.end()));
 	newSheet->SetFilePath(path);
 	newSheet->ResetHistory();
     sheets.push_back(std::move(newSheet));

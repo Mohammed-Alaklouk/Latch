@@ -21,4 +21,7 @@ namespace Serializer {
 	
 	bool writeJsonToFile(const std::filesystem::path& path, const nlohmann::json& j);
 	bool readJsonFromFile(const std::filesystem::path& path, nlohmann::json& j);
+
+	void validateCircuitSnapshot(const Circuit::CircuitSnapshot& snapshot);
+	void validateIdManager(const IdManager& idManager, const std::vector<int>& objectIds, const std::string& name);
 };

@@ -34,13 +34,18 @@ Wire::Wire(const int id, const Wire& other, const std::unordered_map<int, int>& 
 	normalize();
 }
 
-// Currently the wire trusts the input to be correct
+// The wire only checks that its values are in range here
+// The structure of the wire (ids, source, destinations, segments) is validated by the serializer after loading
 // The serializer stores it the same way its stored in momery but without the adjacency list
 // When loading the wire, the adjacency list is rebuilt from the segments
 Wire::Wire(const nlohmann::json& wireJson)
 {
 	ID = wireJson.at("id").get<int>();
-	Value = static_cast<LogicLevel>(wireJson.at("value").get<int>());
+	int valueInt = wireJson.at("value").get<int>();
+	if (valueInt < 0 || valueInt > 2)
+		throw std::runtime_error("Failed to load wire " + std::to_string(ID) + ": invalid value: " + std::to_string(valueInt));
+
+	Value = static_cast<LogicLevel>(valueInt);
 	SourceNodeID = wireJson.at("sourceNodeID").get<int>();
 	DestinationNodeIDs = wireJson.at("destinationNodeIDs").get<std::vector<int>>();
 	const auto& nodeIDManagerJson = wireJson.at("nodeIDManager");
@@ -49,7 +54,12 @@ Wire::Wire(const nlohmann::json& wireJson)
 	for (const auto& nodeJson : wireJson.at("nodes")) {
 		PinRef pin{ nodeJson.at("pin").at(0).get<int>(), nodeJson.at("pin").at(1).get<int>() };
 		Vector2 pos{ nodeJson.at("position").at(0).get<float>(), nodeJson.at("position").at(1).get<float>() };
-		WireNode::NodeType type = static_cast<WireNode::NodeType>(nodeJson.at("type").get<int>());
+		
+		int typeInt = nodeJson.at("type").get<int>();
+		if (typeInt < 0 || typeInt > 1)
+			throw std::runtime_error("Failed to load wire " + std::to_string(ID) + ": invalid node type: " + std::to_string(typeInt));
+
+		WireNode::NodeType type = static_cast<WireNode::NodeType>(typeInt);
 		int id = nodeJson.at("id").get<int>();
 		Nodes.push_back({ pin, pos, type, id });
 		node_id_manager.setIndex(id, (int)Nodes.size() - 1);
